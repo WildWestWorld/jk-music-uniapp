@@ -1,0 +1,2 @@
+<wxs src="./map.wxs" module="map"></wxs>
+<view class="scroll-item-container"><view class="music-item-container"><view class="left"><view class="music-name"><text>{{item.name}}</text></view><view class="artist-name-icon-container"><view class="HQ-icon"><image src="/static/images/HQ.png"></image></view><view class="artist-name">{{map.getArtstNameList(item.artistVoList)}}</view></view></view><view class="right"><image style="width:32px;height:32px;" src="/static/images/more.png"></image></view></view></view>

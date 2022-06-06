@@ -1,0 +1,12 @@
+{
+  "usingComponents": {
+    "muscian-banner": "/components/index/musician-banner/index",
+    "srollable-frame": "/components/index/srollable-frame/index",
+    "musician-card": "/components/index/musician-banner-component/musician-card/index",
+    "recommend-music-card": "/components/index/srollable-frame-component/recommendMusic-card/index",
+    "title-banner": "/components/index/srollable-frame-component/title-banner/index",
+    "lastplaymusic-card": "/components/index/lastplaymusic-card/index",
+    "play-bar": "/components/index/play-bar/index",
+    "j-k-music-list": "/components/common/JKMusicList/index"
+  }
+}

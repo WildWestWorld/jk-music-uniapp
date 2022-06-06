@@ -1,0 +1,56 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/login/index",
+    "pages/search/index",
+    "pages/lib/index",
+    "components/index/musician-banner/index",
+    "pages/play-list/detail",
+    "pages/music-player/detail"
+  ],
+  "subPackages": [],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "捷凯音乐",
+    "navigationBarTextStyle": "black",
+    "navigationStyle": "custom"
+  },
+  "tabBar": {
+    "custom": false,
+    "color": "#7A869A",
+    "selectedColor": "#105DFB",
+    "borderStyle": "white",
+    "list": [
+      {
+        "iconPath": "static/images/explore.png",
+        "selectedIconPath": "static/images/explore-active.png",
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "iconPath": "static/images/searchV2.png",
+        "selectedIconPath": "static/images/searchV2-active.png",
+        "pagePath": "pages/search/index",
+        "text": "搜索"
+      },
+      {
+        "iconPath": "static/images/libV2.png",
+        "selectedIconPath": "static/images/libV2-active.png",
+        "pagePath": "pages/lib/index",
+        "text": "音乐库"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于小程序位置接口的效果展示"
+    }
+  },
+  "plugins": {},
+  "requiredBackgroundModes": [
+    "audio"
+  ],
+  "usingComponents": {},
+  "sitemapLocation": "sitemap.json"
+}

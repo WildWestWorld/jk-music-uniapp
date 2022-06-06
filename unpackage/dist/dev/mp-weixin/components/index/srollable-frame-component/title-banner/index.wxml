@@ -1,0 +1,1 @@
+<view class="header-container"><view class="title">{{title}}</view><block wx:if="{{hideMoreLabel}}"><view class="more">{{moreLabel}}</view></block></view>

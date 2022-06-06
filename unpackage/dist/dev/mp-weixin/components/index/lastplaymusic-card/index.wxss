@@ -1,0 +1,97 @@
+@charset "UTF-8";
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 200rpx 0;
+  box-sizing: border-box;
+}
+page {
+  font-family: 'Barlow,-apple-system,BlinkMacSystemFont,Helvetica Neue,PingFang SC,Microsoft YaHei,Source Han Sans SC,Noto Sans CJK SC,WenQuanYi Micro Hei,sans-serif,AppleGothic' !important;
+  -webkit-user-select: none;
+          user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+  box-sizing: border-box;
+  padding-bottom: 0px;
+}
+.music-card {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 40rpx;
+}
+.music-card .cover {
+  position: relative;
+  width: 128rpx;
+  height: 128rpx;
+}
+.music-card .cover image {
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: 64rpx;
+}
+.music-card .cover .circle {
+  position: absolute;
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 16rpx;
+  background-color: #fff;
+  top: calc(50% - 16rpx);
+  right: calc(50% - 16rpx);
+}
+.music-card .info {
+  margin-left: 30rpx;
+  max-width: 100%;
+}
+.music-card .info .name {
+  margin-top: 20rpx;
+  font-size: 32rpx;
+  color: #002251;
+  line-height: 36rpx;
+}
+.music-card .info .author {
+  margin-top: 12rpx;
+  font-size: 28rpx;
+  color: #7A869A;
+  line-height: 34rpx;
+}
+.music-card .likeAbleContainer {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-self: center;
+  margin-right: 20rpx;
+}
+.music-card .likeAbleContainer .likeAble {
+  width: 32rpx;
+  height: 30rpx;
+}
+

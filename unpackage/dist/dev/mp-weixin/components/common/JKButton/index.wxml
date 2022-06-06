@@ -1,0 +1,1 @@
+<view class="JK-button"><button class="{{[type]}}" style="{{(width?'width:'+width:'')}}" hover-class="{{'hover-'+type}}"><block wx:if="{{icon}}"><image class="icon" src="{{'../../../images/'+icon+'.svg'}}"></image></block><slot></slot></button></view>

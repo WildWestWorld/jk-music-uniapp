@@ -1,0 +1,2 @@
+<wxs src="./map.wxs" module="map"></wxs>
+<view data-event-opts="{{[['tap',[['onTab',['$event']]]]]}}" class="recommand-card" bindtap="__e"><image class="image" src="{{item.photo.url}}"></image><view class="name-container"><view class="name">{{item.name}}</view></view><view class="description">{{map.getArtstNameList(item.artistVoList)}}</view></view>

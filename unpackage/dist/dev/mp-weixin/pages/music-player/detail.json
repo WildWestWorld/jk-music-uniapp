@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "j-k-navigator": "/components/common/JKNavigator/index",
+    "j-k-navigator-v2": "/components/common/JKNavigatorV2/index"
+  }
+}

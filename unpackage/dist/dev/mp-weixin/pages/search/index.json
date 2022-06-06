@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "header-background-image": "/components/play-list/header-background-image/index",
+    "j-k-search": "/components/common/JKSearch/index"
+  }
+}

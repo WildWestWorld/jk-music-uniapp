@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "j-k-button": "/components/common/JKButton/index",
+    "lastplaymusic-card": "/components/index/lastplaymusic-card/index",
+    "j-k-navigator": "/components/common/JKNavigator/index",
+    "header-background-image": "/components/play-list/header-background-image/index"
+  }
+}
