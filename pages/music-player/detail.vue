@@ -23,7 +23,7 @@
                     <text class="musicListLength">({{ playSongList.length}})</text>
                 </view>
 
-                <scroll-view class="musicListSrcoll" scroll-y :show-scrollbar="false" :enhanced="true" :scroll-into-view="'currentMusic' + playSongIndex">
+                <scroll-view class="musicListSrcoll" scroll-y :show-scrollbar="false" :enhanced="true" :scroll-into-view="'currentMusic' + playSongIndex" >
                     <view class="musicItem" :id="'currentMusic' + index" :data-index="index" @tap="changeCurrentMusic" v-for="(item, index) in playSongList" :key="index">
                         <view class="music-info-container">
                             <view :class="playSongIndex === index ? 'current-music-name' : 'music-name'">{{ item.name }}</view>
@@ -50,23 +50,24 @@
                     <view>
                         <image :src="music.photo.url || '../../images/test.png'" class="musicImg" @tap="changeLrcState" v-if="showLrc === false"></image>
                         <view class="lyc-container" @tap="changeLrcState" v-if="showLrc === true">
-                            <scroll-view scroll-y :show-scrollbar="false" :enhanced="true" :scroll-top="lycScrollTop" >
+							<!-- :scroll-top="lycScrollTop" -->
+                            <scroll-view scroll-y :show-scrollbar="false" :enhanced="true" :scroll-into-view="toLyc"   scroll-with-animation="true">
                                 <view class="decorate">1</view>
                                 <view class="decorate">1</view>
                                 <view class="decorate">1</view>
-                                <view class="decorate">1</view>
-                                <view class="decorate">1</view>
-                                <view class="decorate">1</view>
+                                <view class="decorate" >1</view>
+                                <view class="decorate"  >1</view>
+                                <view class="decorate"  :id="'Lyc0'">1</view>
 
 
 
-                                <view  :class="isDoubleLanguage?'lyc-item-for-double-container':'lyc-item-for-container' "  :id="'Lyc' + index" v-for="(item, index) in lycArray" :key="index" >
+                                <view  :class="isDoubleLanguage?'lyc-item-for-double-container':'lyc-item-for-container' "  :id="'Lyc' + (index+1)" v-for="(item, index) in lycArray" :key="index" >
 									<view class="lyc-item-container" >
-										<view :class="currentLycIndex === index ? 'currentLyc' : ''" style="" >
+										<view :class="currentLycIndex === (index) ? 'currentLyc' : ''" style="" >
 											{{ item[1] }}
 										</view>
 																		
-										<view :class="currentLycIndex === index ? 'currentChineseLyc' : ''" v-if="item[2]">
+										<view :class="currentLycIndex === (index) ? 'currentChineseLyc' : ''" v-if="item[2]">
 											{{ item[2] }}
 										</view>
 									</view>
@@ -315,7 +316,7 @@ export default {
 		this.navMarginTop=24
 		this.navHeight= 32
 		this.menuButtonRightPadding=7
-		this.blockSize=20/2/redioDevice
+		this.blockSize=40*redioDevice
 		// #endif
 
 
@@ -1155,7 +1156,7 @@ page {
     height: 100vh;
     z-index: -1;
     background-color: rgba(white, 0.5);
-    backdrop-filter: blur(30px);
+    backdrop-filter: blur(60rpx);
 }
 .maskBgc {
     position: absolute;
@@ -1181,16 +1182,27 @@ page {
     .shrinked-scroll-container {
         position: relative;
         display: flex;
-        max-height: 60rpx;
+    
         width: 30rpx;
         scroll-view {
-            max-height: 50rpx;
+          max-height: 100rpx;
             view {
+
+			
+				max-height: 100rpx;
                 width: 100%;
                 color: rgba(black, 0.5);
                 font-size: 34rpx;
-                line-height: 50rpx;
+                line-height: 100rpx;
                 text-align: center;
+				
+				display: -webkit-box;
+				overflow-x: hidden;
+				white-space: normal!important;
+				text-overflow: ellipsis;
+				word-wrap: break-word;
+				-webkit-line-clamp: 2;
+				-webkit-box-orient: vertical;
             }
 			
             .currentLyc {
@@ -1366,9 +1378,9 @@ page {
         }
     }
     .lyc-container {
-        width: 40vh;
+        width: 80vw;
         height: 50vh;
-
+		max-width: 80vw;
         max-height: 50vh;
         border-radius: 40rpx;
         scroll-view {
@@ -1377,30 +1389,35 @@ page {
 
 
 			.lyc-item-for-container{
-				max-height: 50rpx;
+				padding-top: 10rpx;
+				padding-bottom: 10rpx;
+				height: -webkit-fit-content;
+				height: fit-content;
+
 				width: 100%;
 				color: rgba(black, 0.5);
 				font-size: 34rpx;
-				line-height: 50rpx;
+				
 				text-align: center;
 				.lyc-item-container{
 					
 					.currentLyc {
 						color: #0041c4;
 					}
-					.currentChineseLyc{
-						color: #0041c4;
-					}
+
 
 				}
 			}
 			
 			.lyc-item-for-double-container{
-				max-height: 100rpx;
+				padding-top: 30rpx;
+				padding-bottom: 30rpx;
+				height: -webkit-fit-content;
+			    height: fit-content;
 				width: 100%;
 				color: rgba(black, 0.5);
 				font-size: 34rpx;
-				line-height: 50rpx;
+			
 				text-align: center;
 				.lyc-item-container{
 					
@@ -1408,7 +1425,7 @@ page {
 						color: #0041c4;
 					}
 					.currentChineseLyc{
-						color: #0041c4;
+						color: rgba(#0041c4,0.6);
 					}
 				
 				}
@@ -1429,8 +1446,8 @@ page {
         width: 632rpx;
         max-width: 632rpx;
 
-        height: 162rpx;
-        max-height: 162rpx;
+        height: 170rpx;
+        max-height: 170rpx;
         view {
             position: relative;
             width: 100%;
@@ -1440,7 +1457,7 @@ page {
 
             .music-name-container {
                 width: 100%;
-                height: 52rpx;
+                height: fit-content;
                 color: rgb(8, 8, 8);
                 font-size: 48rpx;
                 font-weight: 1400rpx;
@@ -1453,7 +1470,7 @@ page {
             }
             .album-name-container {
                 width: 100%;
-                height: 40rpx;
+                height: fit-content;
                 color: rgb(255, 45, 85);
                 opacity: 0.6;
                 font-size: 34rpx;
@@ -1468,7 +1485,7 @@ page {
             }
             .artist-name-container {
                 width: 100%;
-                height: 40rpx;
+                height: fit-content;
                 color: rgb(8, 8, 8);
                 opacity: 0.61;
                 font-size: 34rpx;

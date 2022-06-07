@@ -52,10 +52,25 @@ const playerStore = new HYEventStore({
             state.toLyc = '';
             state.currentTime = '00:00';
             state.value = 0;
-            state.isChangeMusic = false; //1.请求歌曲
+            state.isChangeMusic = false;
+			 
+			 //1.请求歌曲
 
             getMusicById(id).then((res) => {
                 console.log(res);
+				
+				state.totalTime = '0';
+				state.formatTime = '00:00';
+				state.lycArray = [];
+				        
+				state.currentLycIndex = 0;
+				state.lycScrollTop = 0;
+				state.toLyc = '';
+				state.currentTime = '00:00';
+				state.value = 0;
+				state.isChangeMusic = false;
+				
+				
                 state.music = res.data;
                 state.id = id; //2.请求歌词
                 //如果存在歌词的链接就请求
@@ -92,7 +107,7 @@ const playerStore = new HYEventStore({
 				
                 backgroundAudioManager.onCanplay(this.dispatch('loadDuration')); //4.监听歌曲事件
 				 
-				if(backgroundAudioManager.duration>1 && backgroundAudioManager.duration<5000 ){
+				if(backgroundAudioManager.duration>1 && backgroundAudioManager.duration<2000 ){
 					
 					let totalTime = backgroundAudioManager.duration;
 					let formatTime = moment(totalTime * 1000).format('mm:ss');
@@ -202,8 +217,10 @@ const playerStore = new HYEventStore({
                             //为什么减6？因为我们是从第7个开始滚动的，也就是中间的这个位置
 							let redioDevice =uni.upx2px(10)/10
 							let isDoubleLanguage = state.isDoubleLanguage
-				
-                            state.lycScrollTop = isDoubleLanguage?(state.currentLycIndex - 0) * 50 /2 / redioDevice:(state.currentLycIndex - 0) * 24.8 /2 / redioDevice
+							
+							
+							
+                            state.lycScrollTop = isDoubleLanguage?(state.currentLycIndex - 0) * 167 * redioDevice:(state.currentLycIndex - 0) * 72 * redioDevice
 							
                             state.toLyc = 'Lyc' + state.currentLycIndex;
                         }
@@ -381,7 +398,7 @@ const playerStore = new HYEventStore({
         //将歌曲放入我们的播放列表中
         addNewMusicToPlayList(state, { item }) {
             let musicItem = item;
-			let CurrentMusicIndex = state.playSongIndex;
+		
             console.log(musicItem);
 
             if (musicItem) {
@@ -395,7 +412,8 @@ const playerStore = new HYEventStore({
 
                 if (musicItemIndex !== -1) {
                     state.playSongIndex = musicItemIndex;
-                    let newCurrentSong = state.playSongList[CurrentMusicIndex];
+					
+                    let newCurrentSong = state.playSongList[musicItemIndex];
                     let playload = {
                         id: newCurrentSong.id,
                         isRefresh: true
@@ -430,7 +448,7 @@ const playerStore = new HYEventStore({
         loadDuration(state) {
             setTimeout(() => {
 				//为什么要加不等于5832.704 因为App端有获取时间BUG，明明有正常的duration时间但是偏要显5832.704
-                if (backgroundAudioManager.duration > 1 &&  backgroundAudioManager.duration < 5000) {
+                if (backgroundAudioManager.duration > 1 &&  backgroundAudioManager.duration < 2000) {
                     // 获取到正确的duration
                     console.log(backgroundAudioManager.duration);
                     let totalTime = backgroundAudioManager.duration;

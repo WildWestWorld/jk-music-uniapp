@@ -30,7 +30,10 @@ export function parseLyric(lyricString) {
         const time = minute + second + millsecond; // 2.获取歌词文本
 
         const text = lineString.replace(timeRegExp, '');
-        lyricInfos.push([time, text]);
+		if(text.length !== 0 && text){
+			lyricInfos.push([time, text]);
+		}
+      
     }
 	
 	const lyric = [];
@@ -59,16 +62,21 @@ export function parseLyric(lyricString) {
 	// })
 	
 	for(var i=0;i< lyricInfos.length;i++){
-		if(i === 0){
+		
+		if(i == 0){
 			FirstItemTime = lyricInfos[0][0]	
+
 		}
 		
-		if(FirstItemTime>lyricInfos[i][0]){
-			isDoubleLanguage=true
-			zeroTimeIndex=i
-			console.log(zeroTimeIndex)
-			
-			break 
+		if(FirstItemTime>=lyricInfos[i][0]){
+			if(i>0){
+				isDoubleLanguage=true
+				zeroTimeIndex=i
+
+				
+				break 
+			}
+
 		}
 	}
 	

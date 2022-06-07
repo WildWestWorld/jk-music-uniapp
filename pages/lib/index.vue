@@ -323,7 +323,7 @@ export default {
 			//重新请求页面
 			let data = {
 			    pageNum: pageNumMusicList,
-			    pageSize: 10,
+			    pageSize: 15,
 			    searchWord: ''
 			};
 
