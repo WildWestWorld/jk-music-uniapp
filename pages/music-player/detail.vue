@@ -311,7 +311,11 @@ export default {
 		// 根据微信小程序的右上侧的胶囊样式 设置导航栏内容的高度
 		// #ifdef H5 || APP-PLUS || MP-ALIPAY
 		
-		let redioDevice =uni.upx2px(10)/10
+		// let redioDevice =uni.upx2px("10")
+		let redioDevice =0.5
+		// let redioDevice = uni.getSystemInfo().devicePixelRatio
+		
+		// console.log(redioDevice);
 		
 		this.navMarginTop=24
 		this.navHeight= 32
@@ -368,11 +372,12 @@ export default {
 		
         console.log(this.deviceRadio);
         console.log(options);
-        let isNowPlayMusic = this.musicIsNowPlayMusic(options.id);
-        console.log(isNowPlayMusic);
+		
+        // let isNowPlayMusic = this.musicIsNowPlayMusic(options.id);
+        // console.log(isNowPlayMusic);
 
         if (isNowPlayMusic) {
-            this.changeMusicIsPlay(true);
+           this.isPlay=true
         }
 
         if (options.id) {
@@ -382,7 +387,8 @@ export default {
             //     music:res.data
             //   })
 
-            console.log(this.music); //创建一个可以后台播放的audio 并且绑定到this上，这样我们就可以在任意位置调用该audio的方法和属性
+            // console.log(this.music); //创建一个可以后台播放的audio 并且绑定到this上，这样我们就可以在任意位置调用该audio的方法和属性
+			
             //上面的是我们以前使用的方法，现在我们使用Store里面的文件来引入一个backgroundAudioManager
             //这样就不用this.backgroundAudioManager 而是直接使用
             //修改：现在引入的方法并不好用该为原来的方法
@@ -525,10 +531,16 @@ export default {
         //改变播放状态的函数
         changePlayState() {
             let isPlay = !this.isPlay;
+			console.log(isPlay);
+			
             playerStore.dispatch('changeMusicPlayState', isPlay);
-            this.setData({
-                isPlay
-            }); // this.changeMusicPlayState(isPlay);
+           
+			
+			// this.setData({
+            //     isPlay
+            // });
+			 
+			 // this.changeMusicPlayState(isPlay);
             // console.log(this.data.isPlay)
         },
 
@@ -854,9 +866,11 @@ export default {
 
             let currentTimeAfterSlider = percentAfterSlider * this.totalTime; //调用backgroundAudioManager的seek函数让他跳转到指定的位置
 
-            backgroundAudioManager.pause();
+            // backgroundAudioManager.pause();
+			// this.isPlay=true;
             backgroundAudioManager.seek(currentTimeAfterSlider);
-            backgroundAudioManager.play();
+			// this.isPlay=true;
+   //          backgroundAudioManager.play();
             playerStore.setState('value', valueAfterSlider);
             let currentTime = moment(currentTimeAfterSlider * 1000).format('mm:ss');
             playerStore.setState('currentTime', currentTime); //设置最新的进度条状态
@@ -1079,7 +1093,7 @@ export default {
                     });
                 }
 
-                if (isPlay) {
+                if (isPlay !== undefined && isPlay !== null) {
                     this.setData({
                         isPlay: isPlay
                     });

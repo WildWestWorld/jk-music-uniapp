@@ -2,7 +2,7 @@
 
 
 
-	<view class="page">
+	<view class="page" v-if="JKRecommandArtistList">
 		<view class="bg-cover" ></view>
 	  <view class="header">
 		<!-- 下面这个img是个图片 不是那个大的全蓝背景，而是一个淡淡的蓝色划痕，属于装饰品 -->
@@ -54,20 +54,20 @@
 	  </view>
 
 	  <!-- 推荐歌单 -->
-	<view class="recommendMusicList" style="width: 100%;" v-if="JKRecommandMusicList && JKRecommandMusicList.length>0">
+	<view class="recommendMusicList" style="width: 100%;" v-if="JKRecommandPlayList && JKRecommandPlayList.length>0 && JKRecommandArtistList ">
 	<!-- 自定义滑动模块组件 -->
-	  <srollableFrame title="推荐歌单" moreLabel="更多歌单" :hideMoreLabel="true" :itemWidth="320" :itemCount="recommandMusicList.length">
+	  <srollableFrame title="推荐歌单" moreLabel="更多歌单" :hideMoreLabel="true" :itemWidth="320" :itemCount="JKRecommandPlayList.length" >
 
-		<recommendMusicCard v-for="(item,index) of recommandMusicList" :key="index" :item="item"></recommendMusicCard>
+		<recommendPlayListCard v-for="(item,index) of JKRecommandPlayList" :key="index" :item="item"></recommendPlayListCard>
 	  </srollableFrame>
 	</view>
 
 	  <!-- 推荐专辑 -->
-	  <view class="recommendAlbumList" style="width: 100%;"  v-if="JKRecommandMusicList && JKRecommandMusicList.length>0">
+	  <view class="recommendAlbumList" style="width: 100%;"  v-if="JKRecommandAlbumList && JKRecommandAlbumList.length>0  && JKRecommandArtistList">
 	<!-- 自定义滑动模块组件 -->
-	  <srollableFrame title="推荐专辑" moreLabel="更多专辑" :hideMoreLabel="true" itemWidth="320" :itemCount="recommandMusicList.length">
+	  <srollableFrame title="推荐专辑" moreLabel="更多专辑" :hideMoreLabel="true" :itemWidth="320" :itemCount="JKRecommandAlbumList.length">
 			
-		<recommendMusicCard v-for="(item,index) of recommandMusicList" :key="index" :item="item"  ></recommendMusicCard>
+		<recommendAlbumCard v-for="(item,index) of JKRecommandAlbumList" :key="index" :item="item"  ></recommendAlbumCard>
 
 	  </srollableFrame>
 	</view>
@@ -84,7 +84,7 @@
 	  </srollableFrame>
 	</view>
 
-	<view class="lastPlayMusic"  v-if="lastPlayMusicList && lastPlayMusicList.length>0">
+	<view class="lastPlayMusic"  v-if="lastPlayMusicList && lastPlayMusicList.length>0  && JKRecommandArtistList ">
 	
 			<titleBanner title="最近播放" moreLabel="更多" hideMoreLabel="true"  ></titleBanner>
 		
@@ -110,18 +110,21 @@ import { getToken } from "../../utils/auth"
 import { sayHello } from "../../api/hello"
 import { getPageByMusicName } from "../../api/music"
 import { getPageByArtistName } from "../../api/artist"
+import { getPageByPlayListName } from "../../api/playList"
+import { getPageByAlbumName } from "../../api/album"
+
 import { playerStore } from "../../store/index"
 // 页面组件
 import  muscianBanner  from "../../components/index/musician-banner/index.vue"
 import  srollableFrame  from "../../components/index/srollable-frame/index.vue"
 import  musicianCard  from "../../components/index/musician-banner-component/musician-card/index.vue"
 import  recommendMusicCard  from "../../components/index/srollable-frame-component/recommendMusic-card/index"
+import  recommendPlayListCard  from "../../components/index/srollable-frame-component/recommendPlayList-card/index"
+import  recommendAlbumCard  from "../../components/index/srollable-frame-component/recommendAlbum-card/index"
 import  titleBanner  from "../../components/index/srollable-frame-component/title-banner/index"
 import  lastplaymusicCard  from "../../components/index/lastplaymusic-card/index"  
 import  playBar  from "../../components/index/play-bar/index"  
 import  JKMusicList  from "../../components/common/JKMusicList/index"  
-
-
 
 
 
@@ -136,6 +139,8 @@ export default {
 		srollableFrame,
 		musicianCard,
 		recommendMusicCard,
+		recommendPlayListCard,
+		recommendAlbumCard,
 		titleBanner,
 		lastplaymusicCard,
 		playBar,
@@ -206,6 +211,8 @@ export default {
     ],
     JKRecommandMusicList:null,
 	JKRecommandArtistList:null,
+	JKRecommandAlbumList:null,
+	JKRecommandPlayList:null,//歌单
     message:'hello world!',
     currentMusic:{},
     isPlay:false,
@@ -232,6 +239,7 @@ export default {
      * 生命周期函数--监听页面初次渲染完成
      */
     onReady() {
+		//获取音乐
 		let data={pageNum:1,pageSize:10,searchWord:''};
 		getPageByMusicName(data).then(res=>{
 		  console.log(res)
@@ -240,8 +248,14 @@ export default {
 		  })
 		})
 		//获取歌手的页面
-		this.getArtistInitPage()
-	},
+		this.getArtistListInitPage()
+		
+		//获取歌单
+		this.getPlayListInitPage()
+		
+		//获取专辑
+		this.getAlbumListInitPage()
+	}, 
     /**
      * 生命周期函数--监听页面显示
      */
@@ -343,8 +357,8 @@ export default {
   
     })
   },
-  //获取aritstPage
-  getArtistInitPage(){
+  //获取aritstPage（函数绑定）
+  getArtistListInitPage(){
 	  let data={pageNum:1,pageSize:10,searchWord:''};
 	  getPageByArtistName(data).then(res=>{
 	    console.log(res)
@@ -353,6 +367,27 @@ export default {
 	    })
 	  })
 	  
+  },
+  //获取歌单（函数绑定）
+  getPlayListInitPage(){
+  	  let data={pageNum:1,pageSize:10,searchWord:''};
+  	  getPageByPlayListName(data).then(res=>{
+  	    console.log(res)
+  	    this.setData({
+  	      'JKRecommandPlayList':res.data.records
+  	    })
+  	  })
+  },
+  
+  //获取歌单（函数绑定）
+  getAlbumListInitPage(){
+  	  let data={pageNum:1,pageSize:10,searchWord:''};
+  	  getPageByAlbumName(data).then(res=>{
+  	    console.log(res)
+  	    this.setData({
+  	      'JKRecommandAlbumList':res.data.records
+  	    })
+  	  })
   },
   //监听专区
   watchPlayerStoreListener(){

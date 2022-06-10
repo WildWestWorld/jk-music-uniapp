@@ -5,6 +5,17 @@ import { parseLyric, debounce, throttle } from '../store/index';
 import moment from '@/miniprogram_npm/moment';
 const backgroundAudioManager = uni.getBackgroundAudioManager();
 const appInstance = getApp();
+const musicNotification = uni.requireNativePlugin('XZH-musicNotification');
+
+musicNotification.init({
+	
+		//点击通知栏跳转页面
+		path: '/pages/music-player/detail', // 非必传
+		// (废弃)设置状态栏小图标，只有 android 8.0 以上才有效，新的方式：覆盖插件目录的 android/res/drawable/music_icon.png
+		icon: '/static/images/back.png',
+});
+
+
 const playerStore = new HYEventStore({
     //常量
     state: {
@@ -31,7 +42,9 @@ const playerStore = new HYEventStore({
         playSongIndex: 0,
         currentSong: null,
 		beforeTotalTime:0,
-		isDoubleLanguage:false
+		isDoubleLanguage:false,
+		
+		isCreateNotification: false, // 是否创建了Notification
     },
     actions: {
         //这里的{id}也可以写作payload，不过payload得传个对象，拿数据的时候得是payload.id
@@ -54,27 +67,27 @@ const playerStore = new HYEventStore({
             state.value = 0;
             state.isChangeMusic = false;
 			 
+			 // 是否已经初始化了通知栏
+			 let isCreateNotification =  state.isCreateNotification
+			 if(!isCreateNotification){
+			 	// let payload={ isCreateNotification :isCreateNotification}
+			 	this.dispatch('createNotification') 
+			 }
+			 
 			 //1.请求歌曲
 
             getMusicById(id).then((res) => {
                 console.log(res);
 				
-				state.totalTime = '0';
-				state.formatTime = '00:00';
-				state.lycArray = [];
-				        
-				state.currentLycIndex = 0;
-				state.lycScrollTop = 0;
-				state.toLyc = '';
-				state.currentTime = '00:00';
-				state.value = 0;
-				state.isChangeMusic = false;
-				
-				
                 state.music = res.data;
-                state.id = id; //2.请求歌词
+                state.id = id; 
+				
+				//更新通知栏
+				this.dispatch('updateNotification')
+				
+				//2.请求歌词
                 //如果存在歌词的链接就请求
-
+				
                 if (state.music.lyc !== null && state.music.lyc) {
                     getDIY(state.music.lyc.url).then((res) => {
                         let lyc = res.data; //方法来自于store里面的parse-lyric
@@ -89,12 +102,17 @@ const playerStore = new HYEventStore({
                 backgroundAudioManager.stop();
 				// #ifdef APP-PLUS
 				 //安卓端无法正常识别带密匙的腾讯云url
-				 backgroundAudioManager.src = state.music.file.url.split("?")[0];
+				 let musicUrl =state.music.file.url
+				 musicUrl =musicUrl.split("?")[0]
+				 state.music.file.url=musicUrl
+				 
+				 backgroundAudioManager.src =musicUrl ;
+				 console.log(musicUrl)
 				// #endif
 				
-				// #ifndef APP-PLUS
-				   backgroundAudioManager.src = state.music.file.url;
-				// #endif
+				// // #ifndef APP-PLUS
+				//    backgroundAudioManager.src = state.music.file.url;
+				// // #endif
 
 				// backgroundAudioManager.src = "http://freetyst.nf.migu.cn/public/product5th/product34/2019/07/1822/2009年06月26日博尔普斯/全曲试听/Mp3_64_22_16/60054701923.mp3?channelid=02&msisdn=7439f518-dfb3-4b4f-bad1-417148e4ba7e&Tim=1654159906659&Key=1785b552502b5e63";
 				// backgroundAudioManager.src = "https://bjetxgzv.cdn.bspapp.com/VKCEYUGU-hello-uniapp/2cc220e0-c27a-11ea-9dfb-6da8e309e0d8.mp3";
@@ -107,19 +125,24 @@ const playerStore = new HYEventStore({
 				
                 backgroundAudioManager.onCanplay(this.dispatch('loadDuration')); //4.监听歌曲事件
 				 
-				if(backgroundAudioManager.duration>1 && backgroundAudioManager.duration<2000 ){
+				 backgroundAudioManager.play();
+				// if(backgroundAudioManager.duration>1 && backgroundAudioManager.duration<2000 ){
 					
-					let totalTime = backgroundAudioManager.duration;
-					let formatTime = moment(totalTime * 1000).format('mm:ss');
-					state.totalTime = totalTime;
-					state.formatTime = formatTime; 
-					state.beforeTotalTime = state.totalTime
-				}
+				// 	let totalTime = backgroundAudioManager.duration;
+				// 	let formatTime = moment(totalTime * 1000).format('mm:ss');
+				// 	state.totalTime = totalTime;
+				// 	state.formatTime = formatTime; 
+				// 	state.beforeTotalTime = state.totalTime
+				// }
                 //监听函数只需要开启一次监听就可以了，因为我们backgroundAudioManager是一直复用的
 	
                 if (state.isFirstPlay) {
                     this.dispatch('watchMusic');
+					this.dispatch('watchNotificaiton')
                     state.isFirstPlay = false;
+
+					
+					
                 }
             });
         },
@@ -129,7 +152,10 @@ const playerStore = new HYEventStore({
             backgroundAudioManager.onPlay(() => {
                 let isPlay = true;
                 state.isPlay = isPlay; //设置全局变量isMusicPlay，isMusicPlay用于检验我们退出当前界面后我们是否点击了相同的音乐
-
+				
+				musicNotification.playOrPause({
+						playing: isPlay
+				});
 
 				// #ifndef APP-PLUS
                 appInstance.globalData.isMusicPlay = true;
@@ -141,7 +167,9 @@ const playerStore = new HYEventStore({
                 let isPlay = false;
                 state.isPlay = isPlay; //当我们进行播放的时候我们就已经
 
-
+				musicNotification.playOrPause({
+						playing: isPlay
+				});
 				
 				// #ifndef APP-PLUS
                 appInstance.globalData.isMusicPlay = false;
@@ -151,6 +179,10 @@ const playerStore = new HYEventStore({
                     let isPlay = false;
                     state.isPlay = isPlay;
                     state.isStop = true;
+					
+					musicNotification.playOrPause({
+							playing: isPlay
+					});
 					
 					// #ifndef APP-PLUS
                     appInstance.globalData.isMusicPlay = false;
@@ -215,7 +247,12 @@ const playerStore = new HYEventStore({
                         if (state.currentLycIndex >= 0) {
                             //设置滚动距离，
                             //为什么减6？因为我们是从第7个开始滚动的，也就是中间的这个位置
-							let redioDevice =uni.upx2px(10)/10
+							// let redioDevice =uni.upx2px(10)/10
+							let redioDevice =0.5
+							// let redioDevice = uni.getSystemInfo().devicePixelRatio
+							
+					
+							// let redioDevice =0.7
 							let isDoubleLanguage = state.isDoubleLanguage
 							
 							
@@ -224,7 +261,7 @@ const playerStore = new HYEventStore({
 							
                             state.toLyc = 'Lyc' + state.currentLycIndex;
                         }
-                    }, 100)
+                    }, 50)
                 ), //监听播放结束的事件
                 backgroundAudioManager.onEnded(() => {
                     //切换音乐
@@ -235,7 +272,9 @@ const playerStore = new HYEventStore({
         //用于进行音乐状态的改变
         changeMusicPlayState(state, isPlay = true) {
             state.isPlay = isPlay; //如果用户把微信判断的背景音乐窗口关闭了
+			
 
+				
             if (state.isPlay && state.isStop && !state.isChangeMusic) {
                 backgroundAudioManager.src = state.music.file.url;
                 backgroundAudioManager.title = state.music.name; //如果关了窗口如何让用户回到原来播放的位置
@@ -246,9 +285,15 @@ const playerStore = new HYEventStore({
             }
 
             if (state.isPlay) {
+				console.log('正在播放');
+				console.log(backgroundAudioManager)
                 backgroundAudioManager.play();
+	
             } else {
+				console.log('暂停');
+				console.log(backgroundAudioManager)
                 backgroundAudioManager.pause();
+				
             }
         },
 
@@ -447,11 +492,15 @@ const playerStore = new HYEventStore({
         //用于修复音乐播放总时长无法正常获取的BUG
         loadDuration(state) {
             setTimeout(() => {
+				
+				let totalTime = backgroundAudioManager.duration;
 				//为什么要加不等于5832.704 因为App端有获取时间BUG，明明有正常的duration时间但是偏要显5832.704
-                if (backgroundAudioManager.duration > 1 &&  backgroundAudioManager.duration < 2000) {
-                    // 获取到正确的duration
-                    console.log(backgroundAudioManager.duration);
-                    let totalTime = backgroundAudioManager.duration;
+                if (totalTime > 20 &&  totalTime < 2000) {
+                    console.log(totalTime);
+                  
+					// if (totalTime> 2000) {
+					// 	 this.dispatch('loadDuration');
+					// }
 					
                     let formatTime = moment(totalTime * 1000).format('mm:ss');
                     state.totalTime = totalTime;
@@ -460,34 +509,162 @@ const playerStore = new HYEventStore({
 					
 
 					
-                    if (appInstance.globalData.musicTotalTime !== state.totalTime || state.beforeTotalTime !== state.totalTime) {
+                    if ( state.beforeTotalTime !== state.totalTime) {
+						
+						
 						// #ifdef APP-PLUS
 							state.beforeTotalTime = state.totalTime
 							clearTimeout();
 						// #endif
 						
-						// #ifdef APP-PLUS
-							state.beforeTotalTime = state.totalTime
-							appInstance.globalData.musicTotalTime = state.totalTime;
-							clearTimeout();
-						// #endif
+						// // #ifdef APP-PLUS
+						// 	state.beforeTotalTime = state.totalTime
+						// 	appInstance.globalData.musicTotalTime = state.totalTime;
+						// 	clearTimeout();
+						// // #endif
                     } else {
 						// #ifdef APP-PLUS
 							state.beforeTotalTime =0
 						// #endif
 						
-						// #ifndef APP-PLUS
-                        appInstance.globalData.musicTotalTime = 0;
-						state.beforeTotalTime =0
-						// #endif
+						// // #ifndef APP-PLUS
+      //                   appInstance.globalData.musicTotalTime = 0;
+						// state.beforeTotalTime =0
+						// // #endif
 						
                         this.dispatch('loadDuration');
                     }
                 } else {
                     this.dispatch('loadDuration');
                 }
-            }, 50);
-        }
+            }, 100);
+        },
+		
+	//创建通知栏
+	createNotification(state){
+			console.log('创建');
+			// 创建通知栏，要创建通知栏成功才能做别的操作
+			return new Promise((resolve, reject) => {
+				musicNotification.createNotification(() => {
+					state.isCreateNotification = true;
+					resolve();
+				})
+			})
+
+	},
+	//更新通知栏
+	updateNotification(state){
+		console.log('更新');
+		let music=state.music
+		let artist =music.artistVoList.map((item)=>{
+			return item.name
+		})
+		artist=artist.join('/')
+		console.log(artist);
+		
+		console.log(music);
+		console.log(music.file.url);
+		let NotificationRes = musicNotification.update({
+			//歌曲名字
+			songName: music.name,
+			//专辑名字
+			artistsName: artist,
+			//专辑图片
+			picUrl: music.photo.url,
+			//搜藏
+			favour:true,
+		});
+		
+		switch (NotificationRes.code) {
+			case -1: //未知错误
+				console.log("未知错误");
+				return;
+			case -2: //没有权限
+				musicNotification.openPermissionSetting(); //没有权限，跳转设置页面
+				return;
+		}
+		
+	 },
+	 watchNotificaiton(state){
+			// 监听暂停或播放按钮事件回调
+			plus.globalEvent.addEventListener('musicNotificationPause', (event) => {
+				console.log("暂停或播放按钮事件回调", event);
+				console.log('转换');
+				let isPlay=!state.isPlay
+				this.dispatch('changeMusicPlayState',isPlay)
+			});
+			// 监听播放上一首按钮事件回调
+			plus.globalEvent.addEventListener('musicNotificationPrevious', (event) => {
+				console.log("播放上一首按钮事件回调", event);
+				this.dispatch('changePlayMusicToNextMusicOrPreMusic',false)
+				
+			});
+			// 监听播放下一首按钮事件回调
+			plus.globalEvent.addEventListener('musicNotificationNext', (event) => {
+				console.log("播放下一首按钮事件回调", event);
+				this.dispatch('changePlayMusicToNextMusicOrPreMusic',true)
+			});
+			
+			// 监听耳机事件回调，注意只能在应用播放音乐的时候才能接收到事件
+			plus.globalEvent.addEventListener('musicMediaButton', (event) => {
+				console.log("耳机按钮事件回调", event);
+
+				switch (e.type) {
+					case 'headset':
+						// 有线耳机事件 拔出： 0, 插入：1
+						if (e.keyCode === 0) {
+							this.dispatch('changeMusicPlayState',false)
+						}
+						break;
+					case 'bluetooth':
+						// 蓝牙耳机事件 断开： 0, 打开：1，连接：2
+						if (e.keyCode === 0) {
+							this.dispatch('changeMusicPlayState',false)
+						}
+						break;
+					case 'mediaButton':
+						// 耳机按键事件，如果有的耳机按键按了没反应，不要怀疑是插件问题，插件已经把事件直接返回了，没有事件，那就是耳机根本没发起事件
+						switch (e.keyCode) {
+							//转换播放
+							case 79:
+								/** 谷歌原文 Key code constant: Headset Hook key. Used to hang up calls and stop media. */
+								let isPlay=!state.isPlay
+								this.dispatch('changeMusicPlayState',isPlay)
+								break;
+							//下一首
+							case 87:
+								/** 谷歌原文 Key code constant: Play Next media key. */
+								this.dispatch('changePlayMusicToNextMusicOrPreMusic',true)
+								break;
+							//上一首
+							case 88:
+								/** 谷歌原文 Key code constant: Play Previous media key. */
+								this.dispatch('changePlayMusicToNextMusicOrPreMusic',false)
+								break;
+							//播放
+							case 126:
+								/** 谷歌原文 Key code constant: Play media key. */
+								this.dispatch('changeMusicPlayState',true)
+								break;
+							//暂停
+							case 127:
+								/** 谷歌原文 Key code constant: Pause media key. */
+								this.dispatch('changeMusicPlayState',false)
+								break;
+						}
+						break;
+				}
+			});
+
+	 },
+	 //关闭通知栏
+	 closeNotificaiton(state){
+		state.isCreateNotification = false;
+		musicNotification.cancel();
+		setTimeout(function() {
+			plus.runtime.quit();
+		}, 100)
+	 },
     }
 });
 export { backgroundAudioManager, playerStore };

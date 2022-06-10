@@ -43,7 +43,7 @@ import { getToken } from './utils/auth'; // app.ts
 
         onLaunch() {
             //获取当前手机的信息，例如屏幕的宽高
-            const info = uni.getSystemInfoSync();
+            const info = uni.getWindowInfo();
             this.globalData.screenHeight = info.screenHeight;
             this.globalData.screenWidth = info.screenWidth;
             this.globalData.statusBarHeight = info.statusBarHeight;
@@ -86,7 +86,9 @@ import { getToken } from './utils/auth'; // app.ts
             } //获取store里面playSongList
         },
 
-        onUnload() {}
+        onUnload() {
+			playerStore.dispatch('closeNotificaiton')
+		}
     };
 </script>
 <style lang="scss">

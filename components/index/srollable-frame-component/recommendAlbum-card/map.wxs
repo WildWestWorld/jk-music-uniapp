@@ -1,0 +1,16 @@
+var getArtstNameList=function(dataList){
+  console.log(dataList)
+  return dataList.map(function(item) {return item.name}).join('/')
+}
+
+var getTagNameList=function(dataList){
+  console.log(dataList)
+  return dataList.map(function(item) {return item.name}).join('/')
+}
+
+
+
+
+module.exports.getArtstNameList=getArtstNameList
+
+module.exports.getTagNameList=getTagNameList

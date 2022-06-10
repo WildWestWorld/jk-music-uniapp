@@ -8,7 +8,7 @@
 					<scroll-view class="tabs" scroll-x :show-scrollbar="false" :enhanced="true" :scroll-into-view="toTab" :scroll-left="scrollLeft">
 						<view class="tab-item-container">
 							<view
-								:class="currentTabIndex === index ? 'current-tab-item' : 'tab-item'"
+								:class="currentTabIndex == index ? 'current-tab-item' : 'tab-item'"
 								:data-clickItemIndex="index"
 								@tap="changeCurrentTabIndex"
 								:id="'Tab' + index"
@@ -141,14 +141,15 @@ export default {
 			//显示ending的变量
 			showEnding:false,
 			
-			scrollRefresherEnabled:false
+			scrollRefresherEnabled:false,
+			
         };
     },
     onLoad() {
         //监听
         this.watchPlayerStoreListener(); //计算页面容器的高度
 
-        const info = uni.getSystemInfoSync(); //整个屏幕的宽度
+        const info = uni.getWindowInfo(); //整个屏幕的宽度
 		console.log(info)
         let screenWidth = info.windowWidth; //整个屏幕的高度
 
@@ -184,7 +185,7 @@ export default {
 		
         let data = {
             pageNum: 1,
-            pageSize: 10,
+            pageSize: 15,
             searchWord: ''
         };
         getPageByMusicName(data).then((res) => {
@@ -233,10 +234,15 @@ export default {
         //改变当前Tab的Index值（页面绑定）
         changeCurrentTabIndex(event) {
             let clickItemIndex = event.currentTarget.dataset.clickitemindex;
-
+			console.log(event);
+			console.log(clickItemIndex);
+			console.log(this.scrollPercent);
+			 clickItemIndex=parseInt(clickItemIndex)
             if (clickItemIndex !== undefined && clickItemIndex !== null) {
+				
                 this.setData({
                     currentTabIndex: clickItemIndex,
+					
                     isClick: true
                 });
             } //如果点击的Item的索引在第四个，就引动
@@ -256,12 +262,12 @@ export default {
         watchSwiperItemPositon(event) {
             let intDx = parseInt(event.detail.dx);
             let scrollPercent = Math.floor(((intDx / this.screenWidth) * 10000) / 100) / 100; // scrollPercent=scrollPercent%1
-            // console.log(event)
-
+   //          console.log(event)
+			// console.log((intDx / this.screenWidth));
             let isClick = this.isClick;
 
-            if (scrollPercent != 0 && isClick === false) {
-				
+            if (scrollPercent != 0 && isClick === false ) {
+				console.log(scrollPercent);
                 this.setData({
                     scrollPercent: scrollPercent
                 });
@@ -271,7 +277,7 @@ export default {
         //监控当前Swiper动画完成(页面绑定)
         watchSwiperAnimationFinish(event) {
             let currentSwiperItemIndex = event.detail.current;
-
+			 currentSwiperItemIndex=parseInt(currentSwiperItemIndex)
             if (currentSwiperItemIndex !== undefined && currentSwiperItemIndex !== null) {
                 this.setData({
                     currentTabIndex: currentSwiperItemIndex,
@@ -292,7 +298,9 @@ export default {
         },
 
         //检测swiper数值改变
-        watchSwiperChange(event) {},
+        watchSwiperChange(event) {
+
+		},
 
         //查询tab-item的宽度
         queryTabItem() {
@@ -358,7 +366,7 @@ export default {
 			//重新请求页面
 			let data = {
 			    pageNum: pageNumMusicList,
-			    pageSize: 10,
+			    pageSize: 15,
 			    searchWord: ''
 			};
 			let isMusicListOver=this.isMusicListOver
@@ -409,11 +417,7 @@ export default {
 			
 		},
 		onScroll(event){
-			// if (event.detail.scrollTop === 0) {
-			// this.scrollRefresherEnabled = true
-			// } else {
-			// this.scrollRefresherEnabled = false
-			// }
+
 		},
 		
         //监听专区

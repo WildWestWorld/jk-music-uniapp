@@ -1,4 +1,8 @@
-import { get } from './request';
-export const getPlayList = (id: String) => {
+import { get, getWithParams } from './request';
+export const getPlayList = (id) => {
     return get(`/playlist/${id}`);
+};
+
+export const getPageByPlayListName = (data) => {
+    return getWithParams(`/playlist/page`, data);
 };
