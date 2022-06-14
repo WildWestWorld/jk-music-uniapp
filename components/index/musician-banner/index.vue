@@ -9,7 +9,7 @@
 				<view class="list" :style="'width:' + (list.length * 290 + 50) + 'rpx'">
 					<!-- 自定义组件 -->
 					<!-- bindclick 点击事件，下层的手机点击事件会被转化成click事件被该层捕获 -->
-					<musicianCard :item="item" @click="onClick" v-for="(item, index) in list" :key="index"></musicianCard>
+					<musicianCard :item="item" v-for="(item, index) in list" :key="index"></musicianCard>
 				</view>
 			</scroll-view>
 		</view>
@@ -48,8 +48,10 @@ export default {
      */
     methods: {
         //将捕获到的click时间打印出来
-        onClick(e) {
-            console.log(e);
+        onTab() {
+			uni.navigateTo({
+				url:"pages/artist/detail"
+			})
         }
     }
 };

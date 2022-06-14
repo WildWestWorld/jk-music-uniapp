@@ -2,7 +2,7 @@
 
 	<view class="navigator" :style="'top:' + navMarginTop + 'px;'  + ('height:' + navHeight + 'px;')  + ('padding:0 ' + (menuButtonRightPadding + 22) + 'px;') + ' '">
         <view class="left-icon-container" @tap="backToIndexPage ? backIndexPage() : backBeforePage()" v-if="showBack === true">
-            <image src="/static/images/back.svg" class="left-icon"></image>
+            <image :src="isWhiteIcon?'/static/images/back-white.svg':'/static/images/back.svg'" class="left-icon" ></image>
         </view>
 
         <view class="title" :style="titleFontSize > 0 ? 'font-size:' + titleFontSize + 'rpx' : ''">{{ title }}</view>
@@ -23,7 +23,8 @@ export default {
             //用于判断回退按钮是否显示
             backToIndexPage: false,
 
-            back: false
+            back: false,
+			
         };
     },
     /**
@@ -66,6 +67,10 @@ export default {
 		menuButtonRightPadding:{
 			type: Number,
 			default: 7
+		},
+		isWhiteIcon:{
+			type:Boolean,
+			default:false
 		}
 
     },
@@ -212,9 +217,13 @@ export default {
     .left-icon-container {
         display: flex;
         align-items: center;
+
+
         .left-icon {
             width: 44rpx;
             height: 44rpx;
+	
+
         }
     }
     .title {

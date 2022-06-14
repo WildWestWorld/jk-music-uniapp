@@ -74,9 +74,19 @@ import { getToken } from './utils/auth'; // app.ts
             // console.log(url)
 
             if (uni.getStorageSync('JK-token')) {
-                uni.navigateTo({
-                    url: '/pages/index/index'
-                });
+				let pages =getCurrentPages()
+				let  currentPage = pages[pages.length-1] //获取当前页面的对象
+				if(currentPage){
+					let url = currentPage.route 
+					console.log(url);
+					//如果是登陆界面
+					if(url == '/pages/login/index'){
+						uni.navigateTo({
+							url: '/pages/index/index'
+						});
+					}
+				}
+
             } else {
                 uni.redirectTo({
                     url: '/pages/login/index'

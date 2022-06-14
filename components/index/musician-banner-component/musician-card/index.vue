@@ -1,7 +1,7 @@
 <!--components/index/musician-banner-component/musician-card/index.wxml-->
 <!-- bindtap绑定一个手机的点击事件，后面我们会把他转成click时间被上层的bindclick捕获 -->
 <template>
-	<view class="card" bindtap="onTab">
+	<view class="card" @tap="onTab">
 	  <image :src="item.photo.url" class="image" mode="scaleToFill"></image>
 	  <view class="name">{{item.name}}</view>
 	  <view class="category" v-if="item.category">{{item.category}}</view>
@@ -40,8 +40,13 @@ import { sayHello } from "../../../../api/hello"
 			 //this.triggerEvent 小程序的触发时间  前面那个是触发的类型 
 			 //后面这个是传进来参数 
 			 onTab() {
-			  this.triggerEvent('click',this.properties.item);
-			  this.hi();
+				 console.log("1123");
+				 
+				 uni.navigateTo({
+				     url: `/pages/artist/index`
+				 }); //对歌曲进行数据请求
+				 
+
 			 },
 			
 			 hi(){

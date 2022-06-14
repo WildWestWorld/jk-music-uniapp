@@ -31,6 +31,10 @@
 		{
 			"path": "pages/music-player/detail",
 			"style": {}
+		},
+		{
+			"path": "pages/artist/index",
+			"style": {}
 		}
 	],
 	"tabBar": {

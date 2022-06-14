@@ -1,0 +1,144 @@
+<template>
+	<view class="artist-page-icon" v-if="false">
+		<image  class="play-icon"  src="/static/images/play-music-play.png"></image>
+	</view>
+	
+	<view class="page">
+
+		
+		<view class="image-container">
+			<view class="image-pic">
+				<image class="artist-image" src="/static/images/test.jpeg" ></image>
+			</view>
+			<view  class="image-bgc">				
+			</view>
+			
+			<view class="aritst-info">
+				<text class="aritst-info-text">ARTIST</text>
+			</view>
+			
+			<view class="aritst-name">
+				<text class="aritst-name-text">AlanWalker</text>
+			</view>
+		</view>
+			<!--  fixFreezing="true" 用于IOS修复 -->
+			<!-- bounce 控制是否回弹效果, iOS 不支持动态修改	 -->
+		<list  class="page-list" :bounce="false" fixFreezing="true">
+			<cell>
+				<view>1</view>
+				<view>1</view>
+				<view>1</view>
+				<view>1</view>
+				<view>1</view>
+				<view>1</view>
+				<view>1</view>
+				<view>1</view>
+				<view>1</view>
+				<view>1</view>
+
+			</cell>
+		</list>
+		
+	</view>
+</template>
+
+<script>
+import JKNavigator from '../../components/common/JKNavigator/index';
+
+	export default {
+		components: {
+		    JKNavigator,
+
+		},
+		data(){
+			return{
+				
+			}
+		}
+	}
+</script>
+
+<style >
+	.page{
+		font-family: AppleGothic;
+	}
+	.image-container{
+		width: 750rpx;
+		height: 684.5rpx;
+
+
+	}
+	.image-bgc{
+		top: 0;
+		left: 0;
+		position: absolute;
+		width: 750rpx;
+		height: 684.5rpx;
+		opacity: 0.5;
+
+		background-image: linear-gradient(to bottom, white, black); 
+	}
+	.image-pic{
+		width: 750rpx;
+		height: 684.5rpx;
+
+	}
+	.artist-image{
+		width: 750rpx;
+		height: 684.5rpx;
+		
+		
+	}
+	.aritst-info{
+		position: absolute;
+
+		
+		top: 482rpx;
+		left: 32rpx;
+		
+
+	}
+	.aritst-info-text{
+		opacity: 0.65;
+		color: #FFFFFF;
+		font-family: AppleGothic;
+		font-size: 36rpx;
+		font-weight: 400;
+		
+	
+	}
+	.aritst-name{
+		position: absolute;
+		width: 750rpx;
+		max-width: 750rpx;
+		top: 526rpx;
+		left: 32rpx;
+	}
+	.aritst-name-text{
+		color: rgb(255, 255, 255);
+		font-family: AppleGothic;
+		font-size: 68rpx;
+		font-weight: 400;
+		line-height: 80rpx;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow:ellipsis;
+	}
+	.artist-page-icon{
+		position: fixed;
+
+		top: 614rpx;
+		left: 578rpx;
+		z-index: 9999;
+	}
+	.play-icon{
+
+		width: 140rpx;
+		height: 140rpx;
+		z-index: 9999;
+	}
+	
+	.page-list{
+		flex: 1;
+	}
+</style>

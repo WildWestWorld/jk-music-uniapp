@@ -303,6 +303,8 @@ export default {
      */
     // 整体的业务逻辑已经转移到store里面的player-store文件里面去了
     onLoad(options) {
+
+		
 		// 根据微信小程序的右上侧的胶囊样式 设置导航栏内容的高度
 		// #ifndef H5 || APP-PLUS || MP-ALIPAY
 		this.calculateMenuAndStatusBar()
@@ -444,6 +446,7 @@ export default {
      * 生命周期函数--监听页面显示
      */
     onShow() {
+
         playerStore.dispatch('saveMusicListIntoStorage');
     },
     /**
