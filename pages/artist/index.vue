@@ -28,29 +28,7 @@
 			</view>
 		</view>
 		
-		<view class="tabs-container">
-			<scroll-view class="tabs" scroll-x :show-scrollbar="false" :enhanced="true" :scroll-into-view="toTab" :scroll-left="scrollLeft">
-				<view class="tab-item-container">
-					<view
-						:class="currentTabIndex == index ? 'current-tab-item' : 'tab-item'"
-						:data-clickItemIndex="index"
-						@tap="changeCurrentTabIndex"
-						:id="'Tab' + index"
-						:scroll-left="scrollRight"
-						v-for="(item, index) in tabList"
-						:key="index"
-						
-					>
-					
-						<view class="tab-item-content">{{ item }}</view>
-					</view>
-					<view class="scroll-bar-container">
-						<view class="scroll-bar" :style="'transform:translateX(' + (85 + 170 * (currentTabIndex + scrollPercent)) + 'rpx) translateX(-50%);'"></view>
-					</view>
-				</view>
-			</scroll-view>
-		</view>
-		
+		<JKScrollTab></JKScrollTab>
 		
 		
 		
@@ -60,9 +38,11 @@
 
 <script>
 	import JKNavigator from '../../components/common/JKNavigator/index';
+	import JKScrollTab from '../../components/common/JKScrollTab/index';
 	export default{
 		components:{
-			JKNavigator
+			JKNavigator,
+			JKScrollTab
 		},
 		
 		data(){

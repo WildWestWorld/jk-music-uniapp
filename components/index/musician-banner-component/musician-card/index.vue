@@ -43,7 +43,7 @@ import { sayHello } from "../../../../api/hello"
 				 console.log("1123");
 				 
 				 uni.navigateTo({
-				     url: `/pages/artist/index`
+				     url: `/pages/artist/detail`
 				 }); //对歌曲进行数据请求
 				 
 
