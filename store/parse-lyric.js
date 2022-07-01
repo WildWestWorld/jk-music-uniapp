@@ -85,6 +85,7 @@ export function parseLyric(lyricString) {
 	if(isDoubleLanguage){	
 	
 		playerStore.setState('isDoubleLanguage',true)
+		uni.$store.commit('setIsDoubleLanguage',true)
 		//push会把对象放在最后面
 		
 		//翻译成中文的歌词
@@ -114,6 +115,7 @@ export function parseLyric(lyricString) {
 		
 	}else{
 		playerStore.setState('isDoubleLanguage',false)
+		uni.$store.commit('setIsDoubleLanguage',false)
 		lyric.push(lyricInfos)
 	}
 

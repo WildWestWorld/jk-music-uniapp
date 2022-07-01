@@ -19,12 +19,6 @@
 			"style": {}
 		},
 		{
-			"path": "components/index/musician-banner/index",
-			"style": {
-				"component": true
-			}
-		},
-		{
 			"path": "pages/play-list/detail",
 			"style": {}
 		},
@@ -34,11 +28,18 @@
 		},
 		{
 			"path": "pages/artist/detail",
-			"style": {}
-		},
-		{
-			"path": "pages/artist/test",
-			"style": {}
+			"style": {
+			  "enablePullDownRefresh": true,
+               
+				"app-plus": { 
+                    "pullToRefresh": { 
+                        "style": "circle",
+                        "color": "#0041c4"
+                    }
+					
+				}
+			
+			}
 		}
 	],
 	"tabBar": {

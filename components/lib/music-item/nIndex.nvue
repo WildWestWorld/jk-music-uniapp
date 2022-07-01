@@ -1,0 +1,177 @@
+<template>
+	<!-- Music卡片 -->
+
+		
+	
+	<view class="scroll-item-container" hover-class="hover" hover-stay-time="100" @tap="onTab()">
+		<view class="music-item-container">
+			<view class="left">
+				<view class="music-name">
+					<text class="name">{{item.name}}</text>
+				</view>
+				<view class="artist-name-icon-container">
+					<view class="HQ-icon">
+						<image class="HQ-icon-image" src="/static/images/HQ.png"></image>
+					</view>
+
+					<view class="artist-name">
+						<text class="artist-names" >{{artist}}</text>
+					</view>
+				</view>
+			</view>
+			<view class="right">
+				<image src="/static/images/more.png" style="width: 64rpx; height: 64rpx"></image>
+			</view>
+		</view>
+	</view>
+	
+
+</template>
+
+<script>
+	import { playerStore } from '../../../store/player-store';
+	export default {
+		data(){
+			return{
+				artist:null
+			};
+		},
+		props:{
+			item:{
+				type:Object,
+				default:()=>{null}
+			}
+		},
+		methods:{
+		   onTab() {
+				let id = this.item.id;
+				uni.navigateTo({
+					url: `/pages/music-player/detail?id=${this.item.id}&musicName=${this.item.name}&artistName=${this.item.artistVoList[0].name}`
+				}); //对歌曲进行数据请求
+				
+
+				let payload = {
+					id: id
+				};
+				playerStore.dispatch('playMusicWithSongIdAction', payload); //获取当前的歌曲列表/当前歌曲的索引
+				
+				//将音乐放入的播放音乐列表中
+				this.addNewMusicInMusicList()
+				
+			},
+			//子函数
+			//将音乐放入的播放音乐列表中
+			addNewMusicInMusicList(){
+				let index=this.dataIndex
+				console.log(index)
+				playerStore.setState("playSongIndex",index)
+				  
+				// playerStore.setState("playSongList",this.data.JKRecommandMusicList)
+				  
+				//拿到item信息
+				let musicItem=this.item;
+				// //拿到当前的音乐列表
+				// let currentPlayList=this.data.playSongList
+				// //将当前的音乐放入到播放列表的首位
+				// currentPlayList.unshift(musicItem)
+				//   //点击这个item之后就把他放进我们的播放列表中
+				// playerStore.setState("playSongList",currentPlayList)
+				// playerStore.setState("playSongIndex",0)
+				let payload={item:musicItem}
+				playerStore.dispatch('addNewMusicToPlayList',payload)
+			}
+		},
+		mounted(){
+			let item = this.$props.item
+			
+			this.artist =item.artistVoList.map(item=>{
+				return item.name
+			}).join('/')
+			
+			console.log(item);
+			// console.log(item.artistVoList);
+			
+			console.log(123);
+			console.log(this.$props.item);
+		}
+	}
+</script>
+
+<style>
+	/* Music卡片的样式 */
+		.hover{
+			background-color: #f7f7f9;
+		}
+		
+	.scroll-item-container {
+	
+	    height: 100rpx;
+	    box-sizing: border-box;
+		margin-bottom: 20rpx;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		
+		}
+	    .music-item-container {
+		margin: 0rpx 46rpx 0rpx 46rpx;
+	        display: flex;
+	        flex-direction: row;
+			justify-content: space-between;
+			}
+	        .left {
+	
+	            display: flex;
+	            flex-direction: column;
+	            overflow: hidden;
+	           flex-wrap: nowrap;
+	           /* #ifndef APP-PLUS */
+	           white-space: nowrap;
+	           /* #endif */
+			   
+	            text-overflow: ellipsis;
+				}
+	            .music-name {
+	                font-size: 36rpx;
+	                font-weight: 400;
+	                display: flex;
+					
+					width: fit-content;
+	                text-overflow: ellipsis;
+					}
+	                .name {
+	                    text-overflow: ellipsis;
+	                    overflow: hidden;
+	                }
+	            .artist-name-icon-container {
+	
+	                line-height: 36rpx;
+	                font-size: 30rpx;
+	                color: rgb(131, 131, 131);
+	                display: flex;
+	                flex-direction: row;
+	                justify-content: flex-start;
+	                align-items: center;
+					}
+					.artist-names{
+						line-height: 18px;
+						font-size: 30rpx;
+						color: rgb(131, 131, 131);
+					}
+	                .HQ-icon {
+	                    width: 40rpx;
+	                    height: 40rpx;
+						}
+	                    .HQ-icon-image {
+	                        width: 40rpx;
+	                        height: 40rpx;
+	                    }
+	
+	        .right {
+				position: relative;
+	            display: flex;
+	            align-items: center;
+				justify-content: center;
+	        }
+	
+</style>

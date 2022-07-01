@@ -127,7 +127,9 @@
                     }
                 }
             }
-        }
+        },
+        "nvueLaunchMode" : "",
+        "nvueCompiler" : "uni-app"
     },
     "quickapp" : {},
     "mp-weixin" : {

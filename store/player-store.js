@@ -2,10 +2,14 @@ import { HYEventStore } from 'hy-event-store';
 import { getMusicById } from '../api/music';
 import { getDIY } from '../api/request';
 import { parseLyric, debounce, throttle } from '../store/index';
+import store from './index.js';
+
 import moment from '@/miniprogram_npm/moment';
 const backgroundAudioManager = uni.getBackgroundAudioManager();
 const appInstance = getApp();
 const musicNotification = uni.requireNativePlugin('XZH-musicNotification');
+
+
 
 musicNotification.init({
 	
@@ -19,6 +23,7 @@ musicNotification.init({
 const playerStore = new HYEventStore({
     //常量
     state: {
+		
         music: null,
         id: 0,
         isFirstPlay: true,
@@ -57,15 +62,25 @@ const playerStore = new HYEventStore({
             } //重置所有音乐变量 目的:改变音乐时会产生遗留上一首音乐的信息
 			
 			state.totalTime = '0';
+			uni.$store.commit('setTotalTime','0')
             state.formatTime = '00:00';
+			uni.$store.commit('setFormatTime','00:00')
             state.lycArray = [];
-        
+			uni.$store.commit('setLycArray',[])
+			
             state.currentLycIndex = 0;
+			uni.$store.commit('setCurrentLycIndex',0)
             state.lycScrollTop = 0;
             state.toLyc = '';
+			uni.$store.commit('setToLyc','')
             state.currentTime = '00:00';
+			uni.$store.commit('setCurrentTime','00:00')
             state.value = 0;
+			uni.$store.commit('setValue',0)
+			
             state.isChangeMusic = false;
+			 
+			uni.$store.commit('setIsChangeMusic',false)
 			 
 			 // 是否已经初始化了通知栏
 			 let isCreateNotification =  state.isCreateNotification
@@ -78,8 +93,12 @@ const playerStore = new HYEventStore({
 
             getMusicById(id).then((res) => {
                 console.log(res);
-				
                 state.music = res.data;
+				// console.log(store);
+				console.log(uni.$store);
+				uni.$store.commit('setMusic',res.data)
+				
+				console.log(state.music);
                 state.id = id; 
 				
 				//更新通知栏
@@ -96,6 +115,8 @@ const playerStore = new HYEventStore({
                         console.log(lyc);
 						
                         state.lycArray = lyc[0];
+						
+						uni.$store.commit('setLycArray',lyc[0])
                     });
                 } //3.开启播放
 
@@ -152,7 +173,7 @@ const playerStore = new HYEventStore({
             backgroundAudioManager.onPlay(() => {
                 let isPlay = true;
                 state.isPlay = isPlay; //设置全局变量isMusicPlay，isMusicPlay用于检验我们退出当前界面后我们是否点击了相同的音乐
-				
+				uni.$store.commit('setIsPlay',isPlay)
 				musicNotification.playOrPause({
 						playing: isPlay
 				});
@@ -166,7 +187,7 @@ const playerStore = new HYEventStore({
             backgroundAudioManager.onPause(() => {
                 let isPlay = false;
                 state.isPlay = isPlay; //当我们进行播放的时候我们就已经
-
+				uni.$store.commit('setIsPlay',isPlay)
 				musicNotification.playOrPause({
 						playing: isPlay
 				});
@@ -179,7 +200,7 @@ const playerStore = new HYEventStore({
                     let isPlay = false;
                     state.isPlay = isPlay;
                     state.isStop = true;
-					
+					uni.$store.commit('setIsPlay',isPlay)
 					musicNotification.playOrPause({
 							playing: isPlay
 					});
@@ -192,20 +213,44 @@ const playerStore = new HYEventStore({
                 }),
                 backgroundAudioManager.onTimeUpdate(
                     throttle(() => {
+						console.log(backgroundAudioManager.currentTime);
                         state.currentTimeMs = backgroundAudioManager.currentTime;
                         let procent = Math.floor((backgroundAudioManager.currentTime / backgroundAudioManager.duration) * 1000) / 10; //当前时间的从s转化为min
-
+						
                         let currentTime = moment(backgroundAudioManager.currentTime * 1000).format('mm:ss'); //不是在slider滑动状态，我们就设置data，如果在滑动我们就不设置data
+						
 
-                        if (Math.abs(state.value - procent) > 1.5) {
-                            procent = state.value;
-                            currentTime = state.currentTime;
-                        }
-
-                        if (!state.isSliderDrag) {
-                            state.value = procent;
-                            state.currentTime = currentTime;
-                        } // let time=backgroundAudioManager.currentTime.toString().split('.')
+						console.log(123,procent);
+						
+                        // if (Math.abs(state.value - procent) > 1.5) {
+                        //     procent = state.value;
+                        //     currentTime = state.currentTime;
+                        // }
+						let value =uni.$store.state.value
+						if (Math.abs(value - procent) > 1.5) {
+						    procent = value;
+						    currentTime = state.currentTime;
+						}
+						
+							
+       //                  if (!state.isSliderDrag ) {
+       //                      state.value = procent;
+							// console.log(123);
+							// uni.$store.commit('setValue',procent)
+							
+       //                      state.currentTime = currentTime;
+							// uni.$store.commit('setCurrentTime',currentTime)
+       //                  }
+							let isSliderDrag =uni.$store.state.isSliderDrag
+						if (!isSliderDrag) {
+						    state.value = procent;
+							console.log(123);
+							uni.$store.commit('setValue',procent)
+							
+						    state.currentTime = currentTime;
+							uni.$store.commit('setCurrentTime',currentTime)
+						}
+						 // let time=backgroundAudioManager.currentTime.toString().split('.')
                         // let timeMs=parseInt(time)*1000
                         // let min=this.transformMsToMin(timeMs)
                         // let sec=this.transformMsToSec(timeMs).toString().slice(0,2)
@@ -238,29 +283,59 @@ const playerStore = new HYEventStore({
                         if (currentIndex <= 0) {
                             currentIndex = 0;
                             state.currentLycIndex = currentIndex;
+							uni.$store.commit('setCurrentLycIndex',currentIndex)
                         }
-
-                        if (state.currentLycIndex !== currentIndex) {
-                            state.currentLycIndex = currentIndex;
-                        }
-
-                        if (state.currentLycIndex >= 0) {
-                            //设置滚动距离，
-                            //为什么减6？因为我们是从第7个开始滚动的，也就是中间的这个位置
+							
+       //                  if (state.currentLycIndex !== currentIndex) {
+       //                      state.currentLycIndex = currentIndex;
+							// uni.$store.commit('setCurrentLycIndex',currentIndex)
+       //                  }
+						
+						if (uni.$store.state.currentLycIndex !== currentIndex) {
+						    state.currentLycIndex = currentIndex;
+							uni.$store.commit('setCurrentLycIndex',currentIndex)
+						}
+						
+						
+     //                    if (state.currentLycIndex >= 0) {
+     //                        //设置滚动距离，
+     //                        //为什么减6？因为我们是从第7个开始滚动的，也就是中间的这个位置
+					// 		// let redioDevice =uni.upx2px(10)/10
+					// 		let redioDevice =0.5
+					// 		// let redioDevice = uni.getSystemInfo().devicePixelRatio
+							
+					
+					// 		// let redioDevice =0.7
+					// 		let isDoubleLanguage = state.isDoubleLanguage
+							
+							
+							
+     //                        state.lycScrollTop = isDoubleLanguage?(state.currentLycIndex - 0) * 167 * redioDevice:(state.currentLycIndex - 0) * 72 * redioDevice
+							
+     //                        state.toLyc = 'Lyc' + state.currentLycIndex;
+							
+					// 		uni.$store.commit('setToLyc','Lyc' + uni.$store.state.currentLycIndex)
+     //                    }
+						
+						if (uni.$store.state.currentLycIndex  >= 0) {
+						    //设置滚动距离，
+						    //为什么减6？因为我们是从第7个开始滚动的，也就是中间的这个位置
 							// let redioDevice =uni.upx2px(10)/10
 							let redioDevice =0.5
 							// let redioDevice = uni.getSystemInfo().devicePixelRatio
 							
-					
+											
 							// let redioDevice =0.7
 							let isDoubleLanguage = state.isDoubleLanguage
 							
 							
 							
-                            state.lycScrollTop = isDoubleLanguage?(state.currentLycIndex - 0) * 167 * redioDevice:(state.currentLycIndex - 0) * 72 * redioDevice
+						 //    state.lycScrollTop = isDoubleLanguage?(state.currentLycIndex - 0) * 167 * redioDevice:(state.currentLycIndex - 0) * 72 * redioDevice
 							
-                            state.toLyc = 'Lyc' + state.currentLycIndex;
-                        }
+						 //    state.toLyc = 'Lyc' + state.currentLycIndex;
+							
+							uni.$store.commit('setToLyc','Lyc' + uni.$store.state.currentLycIndex)
+						}
                     }, 50)
                 ), //监听播放结束的事件
                 backgroundAudioManager.onEnded(() => {
@@ -272,10 +347,10 @@ const playerStore = new HYEventStore({
         //用于进行音乐状态的改变
         changeMusicPlayState(state, isPlay = true) {
             state.isPlay = isPlay; //如果用户把微信判断的背景音乐窗口关闭了
-			
+			uni.$store.commit('setIsPlay',isPlay)
 
 				
-            if (state.isPlay && state.isStop && !state.isChangeMusic) {
+            if (state.isPlay && state.isStop && !uni.$store.state.isChangeMusic) {
                 backgroundAudioManager.src = state.music.file.url;
                 backgroundAudioManager.title = state.music.name; //如果关了窗口如何让用户回到原来播放的位置
                 //我们需要的是秒
@@ -303,19 +378,19 @@ const playerStore = new HYEventStore({
             console.log(state.playSongList);
             console.log(state.playSongList.length); //1.获取当前音乐的索引
 
-            let currentIndex = state.playSongIndex; //2.根据不同的模式播放不同的音乐
+            let currentIndex = uni.$store.state.playSongIndex; //2.根据不同的模式播放不同的音乐
 
-            switch (state.playModeIndex) {
+            switch (uni.$store.state.playModeIndex) {
                 case 0:
                     //顺序播放
                     currentIndex = isNext ? currentIndex + 1 : currentIndex - 1; //如果当前的的索引到了playSongList的长度，就让index置为0
 
-                    if (currentIndex > state.playSongList.length - 1) {
+                    if (currentIndex > uni.$store.state.playSongList.length - 1) {
                         currentIndex = 0;
                     }
 
                     if (currentIndex < 0) {
-                        currentIndex = state.playSongList.length - 1;
+                        currentIndex = uni.$store.state.playSongList.length - 1;
                     }
 
                     break;
@@ -327,19 +402,20 @@ const playerStore = new HYEventStore({
 
                 case 2:
                     //随机播放
-                    currentIndex = Math.floor(Math.random() * state.playSongList.length);
+                    currentIndex = Math.floor(Math.random() * uni.$store.state.playSongList.length);
                     break;
                 //如果随机到的数字还是我们当前播放的音乐就再随机一次
             } //3.获取当前歌曲
 
-            let currentSong = state.playSongList[currentIndex]; //如果没有playSongList
-
+            let currentSong = uni.$store.state.playSongList[currentIndex]; //如果没有playSongList
+			uni.$store.commit('setPlaySongIndex',currentIndex)
             if (!currentSong) {
-                currentSong = state.currentSong;
+                currentSong =  uni.$store.state.currentSong;
             } //如果有歌曲
             else {
                 //设置新的索引 若不设置，就点击下一首只能生效一次
                 state.playSongIndex = currentIndex;
+				uni.$store.commit('setPlaySongIndex',currentIndex)
             } //4.播放新的歌曲
 
             let playload = {
@@ -349,6 +425,7 @@ const playerStore = new HYEventStore({
             this.dispatch('playMusicWithSongIdAction', playload); //判断是否是跳转的
 
             state.isChangeMusic = true;
+			uni.$store.commit('setIsChangeMusic',true)
         },
 
         //快进30s
@@ -363,7 +440,9 @@ const playerStore = new HYEventStore({
 
                 backgroundAudioManager.seek(newCurrentTime);
                 state.value = newValue;
+				uni.$store.commit('setValue',newValue)
                 state.currentTime = currentTime;
+				uni.$store.commit('setCurrentTime',currentTime)
             } else {
                 let newCurrentTime = musicCurrentTime - 30;
                 let newValue = Math.floor((newCurrentTime / backgroundAudioManager.duration) * 1000) / 10;
@@ -371,7 +450,10 @@ const playerStore = new HYEventStore({
 
                 backgroundAudioManager.seek(newCurrentTime);
                 state.value = newValue;
+				uni.$store.commit('setValue',newValue)
+				
                 state.currentTime = currentTime;
+				uni.$store.commit('setCurrentTime',currentTime)
 				
             }
         },
@@ -379,22 +461,23 @@ const playerStore = new HYEventStore({
         //在歌曲列表弹框，点击跳转
         changeCurrentMusic(state, musicIndex) {
             //获取当前的音乐索引后面会用来比对
-            const currentIndex = state.playSongIndex;
+            const currentIndex = uni.$store.state.playSongIndex;
 
             if (currentIndex === musicIndex) {
                 return;
             } //1.把当前音乐的索引改为我们要跳转的音乐的索引
 
             state.playSongIndex = musicIndex; //2.获取我们要跳转的音乐歌曲
-
-            let currentSong = state.playSongList[musicIndex]; //如果没有playSongList
-
+			uni.$store.commit('setPlaySongIndex',musicIndex)
+            // let currentSong = state.playSongList[musicIndex]; //如果没有playSongList
+			let currentSong = uni.$store.state.playSongList[musicIndex]; //如果没有playSongList
             if (!currentSong) {
-                currentSong = state.currentSong;
+                currentSong = uni.$store.state.currentSong;
             } //如果有歌曲
             else {
                 //设置新的索引 若不设置，就点击下一首只能生效一次
                 state.playSongIndex = musicIndex;
+				uni.$store.commit('setPlaySongIndex',musicIndex)
             } //3.播放新的歌曲
 
             let playload = {
@@ -404,6 +487,7 @@ const playerStore = new HYEventStore({
             this.dispatch('playMusicWithSongIdAction', playload); //判断是否是跳转的
 
             state.isChangeMusic = true;
+			uni.$store.commit('setIsChangeMusic',true)
         },
 
         //删除列表中的当前元素
@@ -436,6 +520,7 @@ const playerStore = new HYEventStore({
                     this.dispatch('playMusicWithSongIdAction', playload); //判断是否是跳转的
 
                     state.isChangeMusic = true;
+					uni.$store.commit('setIsChangeMusic',true)
                 }
             }
         },
@@ -448,7 +533,7 @@ const playerStore = new HYEventStore({
 
             if (musicItem) {
                 //拿到当前的音乐列表
-                let currentPlayList = state.playSongList; //查找是否音乐列表中有该音乐
+                let currentPlayList = uni.$store.state.playSongList; //查找是否音乐列表中有该音乐
 
                 let musicItemIndex = currentPlayList.findIndex((item) => {
                     return item.id === musicItem.id;
@@ -457,7 +542,7 @@ const playerStore = new HYEventStore({
 
                 if (musicItemIndex !== -1) {
                     state.playSongIndex = musicItemIndex;
-					
+					uni.$store.commit('setPlaySongIndex',musicItemIndex)
                     let newCurrentSong = state.playSongList[musicItemIndex];
                     let playload = {
                         id: newCurrentSong.id,
@@ -470,21 +555,25 @@ const playerStore = new HYEventStore({
                     currentPlayList.unshift(musicItem); //点击这个item之后就把他放进我们的播放列表中
 
                     state.playSongList = [];
+					
                     state.playSongList = currentPlayList;
+					uni.$store.commit('setPlaySongList',currentPlayList)
                     state.playSongIndex = 0;
+					uni.$store.commit('setPlaySongIndex',0)
                 }
             }
         },
 
         //将音乐列表存放到storage
         saveMusicListIntoStorage(state) {
-            let playSongList = state.playSongList;
+			console.log(uni.$store.state.playSongList);
+            let playSongList = uni.$store.state.playSongList;
             console.log(playSongList);
 
             if (playSongList.length !== 0) {
                 uni.setStorageSync('playSongList', playSongList);
             }
-
+			console.log('storage',uni.getStorageSync('playSongList'));
             console.log(playSongList);
         },
 
@@ -504,9 +593,10 @@ const playerStore = new HYEventStore({
 					
                     let formatTime = moment(totalTime * 1000).format('mm:ss');
                     state.totalTime = totalTime;
+					uni.$store.commit('setTotalTime',totalTime)
                     state.formatTime = formatTime; //有些時候還是會查不出來所以我們需要再查一次
 					
-					
+					uni.$store.commit('setFormatTime',formatTime)
 
 					
                     if ( state.beforeTotalTime !== state.totalTime) {

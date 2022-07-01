@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "hy-event-store": "^1.2.1"
+    "hy-event-store": "^1.2.1",
+    "vuex": "^3.6.2"
   }
 }

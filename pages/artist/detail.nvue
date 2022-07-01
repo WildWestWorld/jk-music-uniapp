@@ -1,82 +1,127 @@
 <template>
 
 	
-	<view class="page" :style="'top:'+ safeAreaTop">
-
-
-		
-		<view class="image-container">
+	<!-- <view class="page" :style="'top:'+ safeAreaTop +'px;'+'height:'+contentHeight+'px'" > -->
+		<view :style="'height:'+ safeAreaTop +'px;'">
 			
-			<view class="artist-page-icon" v-if="false">
-				<image  class="play-icon"  src="/static/images/play-music-play.png"></image>
-			</view>
-			
-			<view class="image-pic">
-				<image class="artist-image" src="/static/images/test.jpeg" ></image>
-			</view>
-			<view  class="image-bgc">				
-			</view>
-			
-			<view class="aritst-info">
-				<text class="aritst-info-text">ARTIST</text>
-			</view>
-			
-			<view class="aritst-name">
-				<text class="aritst-name-text">AlanWalker</text>
-			</view>
 		</view>
+		
+		<list  id="page" class="page-list" :bounce="false" fixFreezing="true"  v-if="artist">
+
+
+				
+			<cell>
+<!-- 					<view :style="'height:'+ safeAreaTop +'px;'">
+						
+					</view> -->
+				<view class="image-container" :style="'width:'+screenWidth">
+					
+					<view class="artist-page-icon" v-if="false">
+						<image  class="play-icon"  src="/static/images/play-music-play.png"></image>
+					</view>
+					
+					<view class="image-pic" :style="'width:'+screenWidth">
+						<image class="artist-image" :src="artist.photo.url||'/static/images/test.jpeg'" mode="hegihtFix" ></image>
+					</view>
+					<view  class="image-bgc" :style="'width:'+screenWidth">				
+					</view>
+					
+					<view class="aritst-info">
+						<text class="aritst-info-text">ARTIST</text>
+					</view>
+					
+					<view class="aritst-name">
+						<text class="aritst-name-text">{{artist.name}}</text>
+					</view>
+				</view>
+			</cell>
+			
+		 <cell>
+			 
+
+		<!-- Tab组件-->
+		<view class="tabs-container" :style="'height:'+contentHeight+'px'">
+			<scroll-view     class="tabs" scroll-x :show-scrollbar="false" :enhanced="true" :scroll-into-view="toTab" :scroll-left="scrollLeft">
+				<view class="tab-item-container">
+					<view
+						:class="currentTabIndex == index ? 'current-tab-item' : 'tab-item'"
+						:data-clickItemIndex="index"
+						@tap="changeCurrentTabIndex"
+						:id="'Tab' + index"
+						:scroll-left="scrollRight"
+						v-for="(item, index) in tabList"
+						:key="index"
+						
+					>
+					<!-- Tab的滑块 -->
+						<view class="tab-item-content" id="test">
+						
+						 <text   :class="currentTabTextIndex == index ? 'current-tab-item-text' : 'tab-item-text'">{{ item }}</text>
+						</view>
+					</view>
+					<view class="scroll-bar-container" :style="'width:'+screenWidth">
+						<view   v-if="isTap" class="click-scroll-bar"  :style="'left:' +  (85 + 170 * (currentTabIndex + scrollPercent)) + 'rpx;'+'transform:translateX(-50%)' "></view>
+						<view   v-if="!isClick" class="scroll-bar"  :style="'left:' +  (85 + 170 * (currentTabIndex + scrollPercent )) + 'rpx;'+'transform:translateX(-50%)' "></view>
+					<!-- <view class="scroll-bar"   :style="'transform:translateX(' +  (85 + 170 * (currentTabIndex + scrollPercent)) + 'rpx;'+'left:-40rpx' "></view> -->
+					</view>
+				</view>
+			</scroll-view>
+			<!-- 0.5px的灰线 -->
+			<view class="tab-bar-line" :style="'width:'+screenWidth"></view>
+			
 			<!--  fixFreezing="true" 用于IOS修复 -->
 			<!-- bounce 控制是否回弹效果, iOS 不支持动态修改	 -->
-		<list  class="page-list" :bounce="false" fixFreezing="true" :style="'max-height:' +tabHight" >
-			<cell>
-				<!-- Tab组件-->
-				<view class="tabs-container">
-					<scroll-view     class="tabs" scroll-x :show-scrollbar="false" :enhanced="true" :scroll-into-view="toTab" :scroll-left="scrollLeft">
-						<view class="tab-item-container">
-							<view
-								:class="currentTabIndex == index ? 'current-tab-item' : 'tab-item'"
-								:data-clickItemIndex="index"
-								@tap="changeCurrentTabIndex"
-								:id="'Tab' + index"
-								:scroll-left="scrollRight"
-								v-for="(item, index) in tabList"
-								:key="index"
-								
-							>
-							<!-- Tab的滑块 -->
-								<view class="tab-item-content" id="test">
-								
-								 <text   :class="currentTabTextIndex == index ? 'current-tab-item-text' : 'tab-item-text'">{{ item }}</text>
-								</view>
-							</view>
-							<view class="scroll-bar-container" :style="'width:'+screenWidth">
-								<view   v-if="isTap" class="click-scroll-bar"  :style="'left:' +  (85 + 170 * (currentTabIndex + scrollPercent)) + 'rpx;'+'transform:translateX(-50%)' "></view>
-								<view   v-if="!isClick" class="scroll-bar"  :style="'left:' +  (85 + 170 * (currentTabIndex + scrollPercent )) + 'rpx;'+'transform:translateX(-50%)' "></view>
-							<!-- <view class="scroll-bar"   :style="'transform:translateX(' +  (85 + 170 * (currentTabIndex + scrollPercent)) + 'rpx;'+'left:-40rpx' "></view> -->
-							</view>
-						</view>
-					</scroll-view>
-					<!-- 0.5px的灰线 -->
-					<view class="tab-bar-line" :style="'width:'+screenWidth"></view>
-					
-				</view>
+			
+			
 				<!-- TabContent  -->
-				<view class="tab-content-container">
-					<swiper
-						class="tab-content"
+					<swiper class="tab-content"
 						@transition="watchSwiperItemPositon"
 						@animationfinish="watchSwiperAnimationFinish"
 						@change="watchSwiperChange"
 						:current="currentTabIndex"
+						 
 					>
-						<swiper-item class="tab-content-item">
-							1
+						<swiper-item class="tab-content-item" >
+
+							<!-- <view class="tab-list-container" > -->
+								
+
+								<list ref="music-list" class="list" :offset-accuracy="5" bounce="true" fixFreezing="true" >
+
+
+
+									
+									<cell>
+										<musicItemNvue  :item="item"  v-for="(item,index) in musicVoList" :key="index" ></musicItemNvue>
+
+									</cell>
+								</list>
+								
+							<!-- </view> -->
 						</swiper-item>
 				
-						<swiper-item class="tab-content-item">2</swiper-item>
+						<swiper-item class="tab-content-item">
+							<view class="tab-list-container" >
+								<list ref="album-list" class="list" :offset-accuracy="5" bounce="true" fixFreezing="true" >
+
+									<refresh>
+									  <text>Refreshing</text>
+									  <loading-indicator></loading-indicator>
+									</refresh>
+									
+									<cell>
+
+									</cell>
+								</list>
+								
+							</view>
+						</swiper-item>
 				
 					</swiper>
-				</view>
+			
+		</view>
+		
+
 			</cell>
 		</list>
 		
@@ -89,8 +134,11 @@ import JKLoading from '../../components/common/JKLoading/index';
 import JKEnding from '../../components/common/JKEnding/index';
 import playBar from '../../components/index/play-bar/index';
 import musicItem from '../../components/lib/music-item/index';
+import musicItemNvue from '../../components/lib/music-item/nIndex';
 
-import { getPageByMusicName } from '../../api/music';
+import swiperPage from './swiper-page.nvue';
+
+import { getArtistById } from '../../api/artist';
 // import { debounce } from '../../store/index.js';
 
 
@@ -100,12 +148,14 @@ import { getPageByMusicName } from '../../api/music';
 			JKLoading,
 			JKEnding,
 			playBar,
-			musicItem
+			musicItem,
+			musicItemNvue,
+			swiperPage
 		},
 		data(){
 			return{
 				safeAreaTop:0,
-				
+				screenHeight:0,
 				
 				
 				contentHeight: 0,
@@ -150,10 +200,15 @@ import { getPageByMusicName } from '../../api/music';
 
 				previousScrollPercent:0,
 				previousTabIndex:0,
+				
+				artist:null,
+				musicList:null
 			}
 		},
 		onReady(){
 			
+				this.initScrollRef()
+				
 			// const query = uni.createSelectorQuery();
 			// query.selectAll('#test').boundingClientRect();
 			// query.selectViewport().scrollOffset();
@@ -169,26 +224,45 @@ import { getPageByMusicName } from '../../api/music';
 			// })
 		},
 
-		onLoad(){
+		onLoad(option){
 		
-
 			
-	
-			
+			// this.setScrollRef();
 			let info = uni.getWindowInfo()
 			console.log(info);
 			let safeAreaTop=info.safeArea.top
 			let screenHeight= info.screenHeight
 			let screenWidth= info.screenWidth
-			let tabHight = screenHeight - safeAreaTop- uni.upx2px(684.5)  
+			// let tabHight = screenHeight - safeAreaTop- uni.upx2px(684.5)
+			let tabHight = screenHeight - safeAreaTop
+			this.contentHeight=screenHeight- safeAreaTop
 			
 			this.safeAreaTop=safeAreaTop
 			this.tabHight = tabHight	
 			this.screenWidth = screenWidth
 			
+			//获取artist
+			console.log(option);
+			let id = option.id
+			getArtistById(id).then((res)=>{
+				this.artist=res.data
+				this.musicVoList=res.data.musicVoList
+				console.log(this.artist);
+				console.log(this.musicVoList);
+			})
+			
 			
 			// this.queryTabItem()
 
+			
+		},
+		// 下拉刷新 需要在page.json中设置下拉刷新的选项为true
+		onPullDownRefresh() {
+			
+			console.log('refresh');
+			setTimeout(function () {
+				uni.stopPullDownRefresh();
+			}, 1000);			
 			
 		},
 		methods:{
@@ -211,7 +285,7 @@ import { getPageByMusicName } from '../../api/music';
 			//改变当前Tab的Index值（页面绑定）
 			changeCurrentTabIndex(event) {
 				
-				
+				// this.setScrollRef();
 			    let clickItemIndex = event.target.dataset.clickItemIndex;
 				console.log(event);
 				console.log(clickItemIndex);
@@ -229,7 +303,7 @@ import { getPageByMusicName } from '../../api/music';
 				this.debounce(function(){
 					that.isClick=false
 					console.log('触发');
-				},500)
+				},800)
 				
 			    if (clickItemIndex >= 3) {
 					this.scrollLeft=400
@@ -247,43 +321,42 @@ import { getPageByMusicName } from '../../api/music';
 			
 				
 			    let scrollPercent = Math.floor(((intDx / screenWidth) * 10000) / 100) / 100; // scrollPercent=scrollPercent%1
-			    let previousScrollPercent=this.previousScrollPercent
+			    // let previousScrollPercent=this.previousScrollPercent
 				// console.log(event)
 				
 				
 				console.log(screenWidth);
 				
-				let isTap=this.isTap;
+				// let isTap=this.isTap;
 				
 				
 				
 			    let isClick = this.isClick;	
-				console.log(isTap,isClick);
-				let offset =Math.abs(scrollPercent - previousScrollPercent)  
+				// let offset =Math.abs(scrollPercent - previousScrollPercent)  
 				
-				//修复会有跳跃滑动块的bug
-				if(isTap===true&& isClick === false){
-				}
+
 				
 			    if (scrollPercent != 0 && isClick === false ) {
 					console.log(scrollPercent);
 					this.scrollPercent=scrollPercent
 					this.isTap=false
 					// this.isClick=false
-					this.previousScrollPercent=scrollPercent
+					// this.previousScrollPercent=scrollPercent
 			    }
 				
 			},
 			
 			//监控当前Swiper动画完成(页面绑定)
 			watchSwiperAnimationFinish(event) {
+				this.setScrollRef();
+				
 			    let currentSwiperItemIndex = event.detail.current;
 				// let previousTabIndex=this.previousTabIndex
 				
 				 currentSwiperItemIndex=parseInt(currentSwiperItemIndex)
 				 
 				//  let offset =Math.abs(currentSwiperItemIndex - previousTabIndex)
-			    if (currentSwiperItemIndex !== undefined && currentSwiperItemIndex !== null ) {
+			    if (currentSwiperItemIndex !== undefined && currentSwiperItemIndex !== null) {
 			        this.currentTabIndex=currentSwiperItemIndex
 					this.currentTabTextIndex=currentSwiperItemIndex
 					// this.previousTabIndex=currentSwiperItemIndex
@@ -308,6 +381,8 @@ import { getPageByMusicName } from '../../api/music';
 				//  let offset =Math.abs(currentSwiperItemIndex - previousTabIndex)
 				if (currentSwiperItemIndex !== undefined && currentSwiperItemIndex !== null ) {
 				    this.currentTabTextIndex=currentSwiperItemIndex
+					
+
 					this.isTap=true
 					// this.isClick=false
 					// this.previousTabIndex=currentSwiperItemIndex
@@ -439,7 +514,55 @@ import { getPageByMusicName } from '../../api/music';
 			onScroll(event){
 
 			},
+			// 吸顶设置专区
+			//初始化吸顶高度
+			initScrollRef(height){
+				let headerHeight = uni.upx2px(684.5)
+				setTimeout(()=>{
+					if (this.$refs['music-list'].setSpecialEffects) {
+					
+						console.log('Success');
+						
+					    this.$refs['music-list'].setSpecialEffects({
+					        id:'page',
+					        headerHeight: headerHeight
+					    });
+						
+					}
+				},1000)
+				clearTimeout()
+			},
+			//设置吸顶的高度
+			setScrollRef(height) {
+				let currentTabTextIndex=this.currentTabTextIndex
+				console.log(currentTabTextIndex);
 				
+				let headerHeight = uni.upx2px(684.5)
+				
+			    if (this.$refs['music-list'].setSpecialEffects && currentTabTextIndex === 0) {
+					console.log('Success');
+					
+			        this.$refs['music-list'].setSpecialEffects({
+			            id:'page',
+			            headerHeight: headerHeight
+			        });
+			    }
+				
+				if (this.$refs['album-list'].setSpecialEffects && currentTabTextIndex === 1) {
+					console.log('Success123');
+					
+				    this.$refs['album-list'].setSpecialEffects({
+				        id:'page',
+				        headerHeight: headerHeight
+				    });
+				}
+				
+				
+			},
+			
+			
+			
+			
 		},
 		
 
@@ -525,17 +648,30 @@ import { getPageByMusicName } from '../../api/music';
 		z-index: 9999;
 	}
 	
+	
+	/* #ifndef APP-PLUS */
+	page {
+	    width: 100%;
+	    min-height: 100%;
+	    display: flex;
+	}
+	
+	/* #endif */
+	
+	
 	.page-list{
 		flex: 1;
-		overflow: hidden;
 	}
 	
 	
 	/* 该部分为Tab的样式 */
 	.tabs-container {
-	    height: 100rpx;
-	    position: relative;
 	    background-color: #fff;
+		  overflow: hidden;
+		  flex-direction: column;
+		/* #ifdef MP-ALIPAY || MP-BAIDU */
+		height: 100vh;
+		/* #endif */
 	}
 	.tabs {
 	        height: 100rpx;
@@ -565,6 +701,10 @@ import { getPageByMusicName } from '../../api/music';
 					color: #999;
 					font-weight: 400;
 					font-size: 32rpx;
+					flex-wrap: nowrap;
+					/* #ifndef APP-PLUS */
+					white-space: nowrap;
+					/* #endif */
 				}
 	            .current-tab-item {
 	                display: flex;
@@ -601,6 +741,10 @@ import { getPageByMusicName } from '../../api/music';
 					color: #0041c4;
 					font-size: 36rpx;
 					font-weight: bold;
+					flex-wrap: nowrap;
+					/* #ifndef APP-PLUS */
+					white-space: nowrap;
+					/* #endif */
 				}
 	
 	            .scroll-bar-container {
@@ -627,88 +771,28 @@ import { getPageByMusicName } from '../../api/music';
 						
 					width: 72rpx;
 					height: 8rpx;
-					background-color:  #0041c4;
+					background-color:  red;
 					
 					/* transition-duration: 0.15s; */
 					transition-property:transform,left;
 					transition-duration:150ms;
 					border-radius: 8rpx;
 				}
-/* 内容的样式 */
-	.tab-content-container {
-	
-	        height:100%;
-	        position: relative;
-	}
-	        .tab-content {
-	            height: 100%;
-	}
-	            .tab-content-item {
-	                height: 100%;
-	}
-	                .scroll-content {
-	                    height: 100%;
-	
-	                    box-sizing: border-box;
-						}
-	                    .scroll-container {
-	                        height: 100%;
-	                       }
-	                        .scroll-item-container {
-								margin-top: 20rpx;
-	                            
-								width: 100%;
-	                            box-sizing: border-box;
-								display: flex;
-								flex-direction: column;
-								}
-	                            .music-item-container {
-	                                height: 100%;
-	                                display: flex;
-	                                flex-direction: row;
-									}
-	                                .left {
-	                                    width: 70%;
-	                                    max-width: 70%;
-	                                    display: flex;
-	                                    flex-direction: column;
-	                                    }
-										.music-name {
-	                                        font-size: 40rpx;
-	                                        font-weight: 400;
-	                                        display: flex;
-	                                        align-items: center;
-	                                        height: 60%;
-	                                        max-height: 60%;
-	                                    }
-	                                    .artist-name-icon-container {
-	                                        height: 40%;
-	                                        max-height: 40%;
-	                                        line-height: 18px;
-	                                        font-size: 30rpx;
-	                                        color: rgb(131, 131, 131);
-	                                        display: flex;
-	                                        flex-direction: row;
-	                                        justify-content: flex-start;
-	                                        align-items: center;
-	                                       }
-											.HQ-icon {
-	                                            width: 40rpx;
-	                                            height: 40rpx;
-												}
-	                                            .image {
-	                                                width: 40rpx;
-	                                                height: 40rpx;
-	                                            }
 
-	                                .right {
-	                                    width: 30%;
-	                                    max-width: 30%;
-	                                    display: flex;
-	                                    justify-content: flex-end;
-	                                    align-items: center;
-	                                }
 
-	   
+/* tab-content */
+.tab-content{
+	flex: 1;
+}
+
+.tab-content-item{
+	flex: 1;
+	flex-direction: column;
+}
+.tab-list-container{
+	flex: 1;
+	flex-direction: column;
+}
+
 	
 </style>

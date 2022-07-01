@@ -65,7 +65,7 @@
 					  </view>
 					</view> -->
 
-										<music-item :item="item" v-for="(item, index) in musicList" :key="index"></music-item>
+										<musicItem :item="item" v-for="(item, index) in musicList" :key="index"></musicItem>
 										<JKLoading  :showLoading="showLoading"></JKLoading>
 										<JKEnding  :showEnding="showEnding"></JKEnding>
 										
@@ -81,6 +81,9 @@
 					</swiper>
 				</view>
 
+				
+				
+				
 				<play-bar :currentMusic="currentMusic" playAnimState="paused" :isPlay="isPlay" :playSongList="playSongList" :playSongIndex="playSongIndex"></play-bar>
 			</view>
 		</view>
@@ -93,6 +96,7 @@ import JKLoading from '../../components/common/JKLoading/index';
 import JKEnding from '../../components/common/JKEnding/index';
 import playBar from '../../components/index/play-bar/index';
 import musicItem from '../../components/lib/music-item/index';
+import musicItemNvue from '../../components/lib/music-item/nIndex';
 import { getPageByMusicName } from '../../api/music';
 import { debounce, playerStore, throttle } from '../../store/index'; // pages/lib/index.ts
 
@@ -103,7 +107,8 @@ export default {
 		JKLoading,
 		JKEnding,
         playBar,
-        musicItem
+        musicItem,
+		musicItemNvue
 		
     },
     data() {

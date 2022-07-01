@@ -9,17 +9,30 @@ import Mixin from './polyfill/mixins';
 
 // #ifndef VUE3
 import Vue from 'vue';
-// import musicianCard from './components/index/musician-banner-component/musician-card/index.vue'
+//挂载vuex
+import Vuex from 'vuex';
+Vue.use(Vuex)
 
+
+// import musicianCard from './components/index/musician-banner-component/musician-card/index.vue'
+import store from './store/index.js'
+
+// uni.$store = playerStore
 
 
 Vue.mixin(Mixin);
 Vue.config.productionTip = false;
+Vue.prototype.$store = store
+
+uni.$store = store
+
 // Vue.component('musician-card', musicianCard);
 
 App.mpType = 'app';
 const app = new Vue({
-    ...App
+    ...App,
+	 store,
+	 Vuex
 });
 app.$mount(
 

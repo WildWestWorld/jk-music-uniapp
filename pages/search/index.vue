@@ -8,6 +8,7 @@
 <script>
 import headerBackgroundImage from '../../components/play-list/header-background-image/index';
 import JKSearch from '../../components/common/JKSearch/index';
+import {mapState} from 'vuex'
 // pages/search/index.ts
 export default {
     components: {
@@ -17,10 +18,16 @@ export default {
     data() {
         return {};
     },
+	computed:{
+		...mapState(['music'])
+	},
     /**
      * 生命周期函数--监听页面加载
      */
-    onLoad() {},
+    onLoad() {
+		console.log(this.$store.state.hasLogin);
+		console.log(this.$store.state.music);
+	},
     /**
      * 生命周期函数--监听页面初次渲染完成
      */
@@ -28,7 +35,10 @@ export default {
     /**
      * 生命周期函数--监听页面显示
      */
-    onShow() {},
+    onShow() {
+		this.$store.commit('setHasLogin',true)
+		console.log(this.$store.state.music);
+	},
     /**
      * 生命周期函数--监听页面隐藏
      */

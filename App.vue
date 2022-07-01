@@ -57,6 +57,7 @@ import { getToken } from './utils/auth'; // app.ts
 
             if (playSongList.length !== 0) {
                 playerStore.setState('playSongList', playSongList);
+				uni.$store.commit('setPlaySongList',playSongList)
                 console.log(playSongList);
             }
         },

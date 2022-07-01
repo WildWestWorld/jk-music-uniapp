@@ -40,10 +40,10 @@ import { sayHello } from "../../../../api/hello"
 			 //this.triggerEvent 小程序的触发时间  前面那个是触发的类型 
 			 //后面这个是传进来参数 
 			 onTab() {
-				 console.log("1123");
+				 console.log(this.item);
 				 
 				 uni.navigateTo({
-				     url: `/pages/artist/detail`
+				     url: `/pages/artist/detail?id=${this.item.id}&artistName=${this.item.name}`
 				 }); //对歌曲进行数据请求
 				 
 

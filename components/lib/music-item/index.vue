@@ -10,7 +10,7 @@
                         <image src="/static/images/HQ.png"></image>
                     </view>
 
-                    <view class="artist-name">{{  map.getArtstNameList(item.artistVoList)}}</view>
+                    <view class="artist-name">{{map.getArtstNameList(item.artistVoList) || ''}}</view>
                 </view>
             </view>
             <view class="right">
@@ -26,7 +26,7 @@ import { playerStore } from '../../../store/player-store';
 export default {
     data() {
         return {
-
+			artist:null
         };
     },
 	props:{
@@ -39,6 +39,9 @@ export default {
      * 生命周期函数--监听页面加载
      */,
     onLoad() {
+		this.artist =item.artistVoList.map(item=>{
+			return item.name
+		}).join('/')
 	},
     /**
      * 生命周期函数--监听页面初次渲染完成

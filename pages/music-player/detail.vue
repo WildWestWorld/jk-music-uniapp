@@ -1,7 +1,7 @@
 <template>
 
     <block>
-		<view v-if="music">
+		<view  v-if=" music !== null ">
 			
 		
 		<JKNavigator title="NOW PLAYING" :navMarginTop="navMarginTop" :navHeight="navHeight" :menuButtonRightPadding="menuButtonRightPadding"  :backToIndexPage="false"></JKNavigator>
@@ -63,11 +63,11 @@
 
                                 <view  :class="isDoubleLanguage?'lyc-item-for-double-container':'lyc-item-for-container' "  :id="'Lyc' + (index+1)" v-for="(item, index) in lycArray" :key="index" >
 									<view class="lyc-item-container" >
-										<view :class="currentLycIndex === (index) ? 'currentLyc' : ''" style="" >
+										<view :class="currentLycIndex == index ? 'currentLyc' : ''" style="" >
 											{{ item[1] }}
 										</view>
 																		
-										<view :class="currentLycIndex === (index) ? 'currentChineseLyc' : ''" v-if="item[2]">
+										<view :class="currentLycIndex == index ? 'currentChineseLyc' : ''" v-if="item[2]">
 											{{ item[2] }}
 										</view>
 									</view>
@@ -228,6 +228,10 @@ import { get, getDIY } from '../../api/request';
 import { getMusicById } from '../../api/music';
 import { backgroundAudioManager, debounce, parseLyric, playerStore, throttle } from '../../store/index';
 import moment from '@/miniprogram_npm/moment';
+
+import { mapState, mapMutations } from 'vuex'
+
+
 const app = getApp();
 const playModeNames = ['order', 'repeat', 'random']; //！！！！！！！！！！！
 // 该页面的大部分的逻辑代码都转移到了store/plaer-store了，留下来的都是原稿
@@ -239,22 +243,22 @@ export default {
     },
     data() {
         return {
-            value: 0,
-            music: null,
-            isPlay: false,
-            totalTime: 0,
-            formatTime: '00:00',
-            currentTime: '00:00',
+			
+   //          value: 0,
+   //          isPlay: false,
+   //          totalTime: 0,
+   //          currentTime: '00:00',
+			// formatTime:'00:00',
             canPlay: false,
             percent: 0,
             showLrc: false,
-            lycArray: [],
-            currentLycIndex: 0,
+            // lycArray: [],
+            // currentLycIndex: 0,
             lycScrollTop: 0,
             musicSrc: null,
             musicName: null,
             musicId: null,
-            toLyc: '',
+            // toLyc: '',
             showMusicList: false,
             contentHeight: 0,
 
@@ -265,8 +269,8 @@ export default {
             isSliderDrag: false,
             playModeIndex: 0,
             playModeName: 'order',
-            playSongList: [],
-            playSongIndex: 0,
+            // playSongList: [],
+            // playSongIndex: 0,
             toCurrentMusic: '',
             toView: '',
             id: '',
@@ -295,16 +299,48 @@ export default {
 			blockSize:0,
 			
 			//是否为双语歌词
-			isDoubleLanguage:false
+			// isDoubleLanguage:false
         };
     },
+	computed:{
+		...mapState(['music','formatTime','value','currentTime','totalTime','isPlay','lycArray','currentLycIndex','toLyc','isDoubleLanguage','playSongList','playSongIndex'])
+		// ...mapState({
+		// 	music:state=>state.music,
+		// 	formatTime:state=>state.formatTime
+		// })
+		
+		// music(){
+		// 	return uni.$store.state.music
+		// },
+		// formatTime(){
+		// 	return uni.$store.state.formatTime
+		// },
+		// value(){
+		// 	return uni.$store.state.value
+		// },
+		// currentTime(){
+		// 	return uni.$store.state.currentTime
+		// },
+	},
+	watch:{
+		 listenMusicData(newVal, oldVal) {
+		 // 此处处理逻辑
+		   this.music = uniapp.$store.state.music
+		
+		 }
+	},
     /**
      * 生命周期函数--监听页面加载
      */
     // 整体的业务逻辑已经转移到store里面的player-store文件里面去了
     onLoad(options) {
-
-		
+		console.log('onLoadRun');
+		// uni.$store.commit('setHasLogin',123)
+		// setTimeout(()=>{
+		// 	console.log(this.musicVuex);
+		// 	console.log(this.$store);
+		// 	},2000)
+		// clearTimeout()
 		// 根据微信小程序的右上侧的胶囊样式 设置导航栏内容的高度
 		// #ifndef H5 || APP-PLUS || MP-ALIPAY
 		this.calculateMenuAndStatusBar()
@@ -343,7 +379,7 @@ export default {
         } //监听和获取歌曲的信息
 		
 		
-        this.watchPlayerStoreListener(); //计算页面容器的高度
+        // this.watchPlayerStoreListener(); //计算页面容器的高度
 
         const info = uni.getSystemInfoSync(); //整个屏幕的高度
 
@@ -378,17 +414,20 @@ export default {
         // let isNowPlayMusic = this.musicIsNowPlayMusic(options.id);
         // console.log(isNowPlayMusic);
 
-        if (isNowPlayMusic) {
-           this.isPlay=true
-        }
+        // if (isNowPlayMusic) {
+        //    this.isPlay=true
+        // }
 
         if (options.id) {
-            console.log(`/music/${options.id}`); // getMusicById(options.id).then(res=>{
-            //   console.log(res)
-            //   this.setData({
-            //     music:res.data
-            //   })
-
+            console.log(`/music/${options.id}`); 
+			// this.music=this.$store.state.music
+			console.log('music123',this.music);
+			// getMusicById(options.id).then(res=>{
+   //            console.log(res)
+   //            this.setData({
+   //              music:res.data
+   //            })
+			// })
             // console.log(this.music); //创建一个可以后台播放的audio 并且绑定到this上，这样我们就可以在任意位置调用该audio的方法和属性
 			
             //上面的是我们以前使用的方法，现在我们使用Store里面的文件来引入一个backgroundAudioManager
@@ -441,7 +480,9 @@ export default {
     /**
      * 生命周期函数--监听页面初次渲染完成
      */
-    onReady() {},
+    onReady() {
+		
+	},
     /**
      * 生命周期函数--监听页面显示
      */
@@ -462,7 +503,7 @@ export default {
         // //封装好的函数，就在watchPlayerStoreListener上面
         //     this.musicStateWatchFunciton
         //     );
-        // playerStore.dispatch('saveMusicListIntoStorage')
+        playerStore.dispatch('saveMusicListIntoStorage')
     },
     /**
      * 页面相关事件处理函数--监听用户下拉动作
@@ -576,6 +617,7 @@ export default {
                 playModeIndex: 2
             });
             playerStore.setState('playModeIndex', 2);
+			uni.$store.commit('setPlayModeIndex',2)
             uni.setStorageSync('playModeIndex', 2);
             uni.showToast({
                 title: '随机播放',
@@ -589,6 +631,7 @@ export default {
                 playModeIndex: 1
             });
             playerStore.setState('playModeIndex', 1);
+			uni.$store.commit('setPlayModeIndex',1)
             uni.setStorageSync('playModeIndex', 1);
             uni.showToast({
                 title: '单曲循环',
@@ -602,6 +645,7 @@ export default {
                 playModeIndex: 0
             });
             playerStore.setState('playModeIndex', 0);
+			uni.$store.commit('setPlayModeIndex',0)
             uni.setStorageSync('playModeIndex', 0);
             uni.showToast({
                 title: '列表循环',
@@ -613,17 +657,17 @@ export default {
         //切换下一首(页面绑定)
         changePlayMusicToNextMusic() {
             //重置歌词状态，不重置会导致歌词还保留上一首歌曲的歌曲的位置
-            this.setData({
-                currentLycIndex: 0
-            });
+            // this.setData({
+            //     currentLycIndex: 0
+            // });
             playerStore.dispatch('changePlayMusicToNextMusicOrPreMusic', true);
         },
 
         //切换上一首(页面绑定)
         changePlayMusicToPreMusic() {
-            this.setData({
-                currentLycIndex: 0
-            });
+            // this.setData({
+            //     currentLycIndex: 0
+            // });
             playerStore.dispatch('changePlayMusicToNextMusicOrPreMusic', false);
         },
 
@@ -868,23 +912,33 @@ export default {
             //此时的总时间是Ms 我们需要s，所以除以1000
 
             let currentTimeAfterSlider = percentAfterSlider * this.totalTime; //调用backgroundAudioManager的seek函数让他跳转到指定的位置
-
+			
+			
+			
             // backgroundAudioManager.pause();
 			// this.isPlay=true;
+			console.log('currentTimeAfterSlider',currentTimeAfterSlider,percentAfterSlider,this.totalTime);
             backgroundAudioManager.seek(currentTimeAfterSlider);
 			// this.isPlay=true;
    //          backgroundAudioManager.play();
             playerStore.setState('value', valueAfterSlider);
+			uni.$store.commit('setValue',valueAfterSlider)
             let currentTime = moment(currentTimeAfterSlider * 1000).format('mm:ss');
             playerStore.setState('currentTime', currentTime); //设置最新的进度条状态
-
-            this.setData({
-                value: valueAfterSlider,
-                // 结束拖动事件，结束拖动状态
-                isSliderDrag: false,
-                currentTime: currentTime
-            });
+			uni.$store.commit('setCurrentTime',currentTime)
+          
+		  
+			// this.setData({
+   //              value: valueAfterSlider,
+   //              // 结束拖动事件，结束拖动状
+   //              isSliderDrag: false,
+   //              currentTime: currentTime
+   //          });
+			
+			
             playerStore.setState('isSliderDrag', false);
+			
+			uni.$store.commit('setIsSliderDrag',false)
         },
 
         //用于监听页面的拖动状态(理应保留)
@@ -893,12 +947,13 @@ export default {
                 isSliderDrag: true
             });
             playerStore.setState('isSliderDrag', true); //获取滑动正在拖动的位置当前值
-
+			uni.$store.commit('setIsSliderDrag',true)
             let valueAfterDrag = event.detail.value;
             console.log(valueAfterDrag); //转化为百分比
 
             let percentAfterDrag = valueAfterDrag / 100;
             let currentTimeAfterDrag = percentAfterDrag * this.totalTime; //时间格式化
+			console.log('currentTimeAfterDrag',currentTimeAfterDrag,this.totalTime);
             // let time=currentTimeAfterDrag.toString().split('.')
             // let timeMs=parseInt(time)*1000
             // let min=this.transformMsToMin(timeMs)
@@ -911,11 +966,15 @@ export default {
 
             let currentTime = moment(currentTimeAfterDrag * 1000).format('mm:ss');
             playerStore.setState('isSliderDrag', true);
+			uni.$store.commit('setIsSliderDrag',true)
             playerStore.setState('currentTime', currentTime);
-            this.setData({
-                isSliderDrag: true,
-                currentTime: currentTime
-            });
+			uni.$store.commit('setCurrentTime',currentTime)
+			
+            // this.setData({
+            //     isSliderDrag: true,
+            //     currentTime: currentTime
+            // });
+			
             console.log(currentTime);
         },
 
@@ -1084,12 +1143,17 @@ export default {
             //若只有最右边的括号里只有个值，就返回的是对象，若是有多个值加个中括号就是对象里面的值了
             //播放相关的变量监听
             playerStore.onStates(['music', 'id', 'isPlay'], ({ music, id, isPlay }) => {
-                if (music) {
-                    this.setData({
-                        music: music
-                    });
+              console.log('监听');
+			   console.log(music);
+				if (music) {
+					console.log('music改变了');
+					console.log(music);
+					this.music=music
+                    // this.setData({
+                    //     music: music
+                    // });
                 }
-
+				
                 if (id) {
                     this.setData({
                         id: id
