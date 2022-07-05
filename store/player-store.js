@@ -69,10 +69,10 @@ const playerStore = new HYEventStore({
 			uni.$store.commit('setLycArray',[])
 			
             state.currentLycIndex = 0;
-			uni.$store.commit('setCurrentLycIndex',0)
+			// uni.$store.commit('setCurrentLycIndex',0)
             state.lycScrollTop = 0;
             state.toLyc = '';
-			uni.$store.commit('setToLyc','')
+			// uni.$store.commit('setToLyc','')
             state.currentTime = '00:00';
 			uni.$store.commit('setCurrentTime','00:00')
             state.value = 0;
@@ -80,13 +80,16 @@ const playerStore = new HYEventStore({
 			
             state.isChangeMusic = false;
 			 
-			uni.$store.commit('setIsChangeMusic',false)
+			// uni.$store.commit('setIsChangeMusic',false)
 			 
 			 // 是否已经初始化了通知栏
-			 let isCreateNotification =  state.isCreateNotification
+			 let isCreateNotification =  uni.$store.state.isCreateNotification
+			
 			 if(!isCreateNotification){
 			 	// let payload={ isCreateNotification :isCreateNotification}
 			 	this.dispatch('createNotification') 
+				state.isCreateNotification=true
+				uni.$store.commit('setIsCreateNotification',true)
 			 }
 			 
 			 //1.请求歌曲
@@ -156,12 +159,14 @@ const playerStore = new HYEventStore({
 				// 	state.beforeTotalTime = state.totalTime
 				// }
                 //监听函数只需要开启一次监听就可以了，因为我们backgroundAudioManager是一直复用的
-	
-                if (state.isFirstPlay) {
+               
+			   
+			   
+				if (uni.$store.state.isFirstPlay) {
                     this.dispatch('watchMusic');
 					this.dispatch('watchNotificaiton')
                     state.isFirstPlay = false;
-
+					uni.$store.commit('setIsFirstPlay',false)
 					
 					
                 }
@@ -174,10 +179,14 @@ const playerStore = new HYEventStore({
                 let isPlay = true;
                 state.isPlay = isPlay; //设置全局变量isMusicPlay，isMusicPlay用于检验我们退出当前界面后我们是否点击了相同的音乐
 				uni.$store.commit('setIsPlay',isPlay)
+				// console.log(uni.$store.state.CurrentMusicIndex);
 				musicNotification.playOrPause({
 						playing: isPlay
 				});
-
+				
+				//更新通知栏
+				this.dispatch('updateNotification')
+				
 				// #ifndef APP-PLUS
                 appInstance.globalData.isMusicPlay = true;
                 appInstance.globalData.musicId = state.id;
@@ -226,10 +235,12 @@ const playerStore = new HYEventStore({
                         //     procent = state.value;
                         //     currentTime = state.currentTime;
                         // }
+						
 						let value =uni.$store.state.value
 						if (Math.abs(value - procent) > 1.5) {
 						    procent = value;
 						    currentTime = state.currentTime;
+							currentTime = uni.$store.state.currentTime
 						}
 						
 							
@@ -263,11 +274,14 @@ const playerStore = new HYEventStore({
                         //为什么乘1000因为我们在parse-lyric里面把以ms为单位，currentTime返回的是s，所以乘以1000
 
                         let musicCurrentTime = backgroundAudioManager.currentTime * 1000;
-                        let lycArray = state.lycArray; //原理：找出比当前时间大的一些的歌词的位置，找到了，当前歌词的位置就在到歌词的下面
-                        //如果lycArray的长度没有值的话就直接跳过
+                        let lycArray =uni.$store.state.lycArray; //原理：找出比当前时间大的一些的歌词的位置，找到了，当前歌词的位置就在到歌词的下面
+						
+						
+						
+						//如果lycArray的长度没有值的话就直接跳过
                         //注意：设置值的时候得在这一行之前，因为这里有个return，若是if()里面的成立，return后面的命令行就不会触发了
 
-                        if (!state.lycArray.length || state.lycArray.length === 0) return;
+                        if (!lycArray.length || lycArray.length === 0) return;
                         let i = 0;
 
                         for (; i < lycArray.length; i++) {
@@ -338,10 +352,11 @@ const playerStore = new HYEventStore({
 						}
                     }, 50)
                 ), //监听播放结束的事件
-                backgroundAudioManager.onEnded(() => {
+                backgroundAudioManager.onEnded(debounce(() => {
                     //切换音乐
                     this.dispatch('changePlayMusicToNextMusicOrPreMusic', true);
-                });
+                },500));
+				
         },
 
         //用于进行音乐状态的改变
@@ -350,7 +365,7 @@ const playerStore = new HYEventStore({
 			uni.$store.commit('setIsPlay',isPlay)
 
 				
-            if (state.isPlay && state.isStop && !uni.$store.state.isChangeMusic) {
+            if (state.isPlay && state.isStop && !state.isChangeMusic) {
                 backgroundAudioManager.src = state.music.file.url;
                 backgroundAudioManager.title = state.music.name; //如果关了窗口如何让用户回到原来播放的位置
                 //我们需要的是秒
@@ -383,6 +398,7 @@ const playerStore = new HYEventStore({
             switch (uni.$store.state.playModeIndex) {
                 case 0:
                     //顺序播放
+					
                     currentIndex = isNext ? currentIndex + 1 : currentIndex - 1; //如果当前的的索引到了playSongList的长度，就让index置为0
 
                     if (currentIndex > uni.$store.state.playSongList.length - 1) {
@@ -408,13 +424,13 @@ const playerStore = new HYEventStore({
             } //3.获取当前歌曲
 
             let currentSong = uni.$store.state.playSongList[currentIndex]; //如果没有playSongList
-			uni.$store.commit('setPlaySongIndex',currentIndex)
+			// uni.$store.commit('setPlaySongIndex',currentIndex)
             if (!currentSong) {
                 currentSong =  uni.$store.state.currentSong;
             } //如果有歌曲
             else {
                 //设置新的索引 若不设置，就点击下一首只能生效一次
-                state.playSongIndex = currentIndex;
+                // state.playSongIndex = currentIndex;
 				uni.$store.commit('setPlaySongIndex',currentIndex)
             } //4.播放新的歌曲
 
@@ -425,7 +441,7 @@ const playerStore = new HYEventStore({
             this.dispatch('playMusicWithSongIdAction', playload); //判断是否是跳转的
 
             state.isChangeMusic = true;
-			uni.$store.commit('setIsChangeMusic',true)
+			// uni.$store.commit('setIsChangeMusic',true)
         },
 
         //快进30s
@@ -487,7 +503,7 @@ const playerStore = new HYEventStore({
             this.dispatch('playMusicWithSongIdAction', playload); //判断是否是跳转的
 
             state.isChangeMusic = true;
-			uni.$store.commit('setIsChangeMusic',true)
+			// uni.$store.commit('setIsChangeMusic',true)
         },
 
         //删除列表中的当前元素
@@ -496,23 +512,27 @@ const playerStore = new HYEventStore({
             console.log(state.playSongList);
             console.log(state.playSongIndex); //必须是不等于undefined 不然为0的时候他就工作了
 
-            let playSongList = state.playSongList; //当前播放的音乐的索引
+            let playSongList = uni.$store.state.playSongList; //当前播放的音乐的索引
 
-            let CurrentMusicIndex = state.playSongIndex;
+            let CurrentMusicIndex = uni.$store.state.playSongIndex;
 
             if (musicIndex !== undefined) {
                 playSongList.splice(musicIndex, 1); //不设置为空，页面无法监听到
 
                 state.playSongList = [];
+				uni.$store.commit('setPlaySongList',[])
                 state.playSongList = playSongList; //要被删除的索引在播放的音乐的上面
-
+				uni.$store.commit('setPlaySongList',playSongList)
+				
                 if (musicIndex < CurrentMusicIndex) {
                     state.playSongIndex = CurrentMusicIndex - 1;
+					uni.$store.commit('setPlaySongIndex',CurrentMusicIndex - 1)
                 } //要被删除的索引就是播放的音乐
 
                 if (musicIndex === CurrentMusicIndex) {
                     state.playSongIndex = CurrentMusicIndex;
-                    let newCurrentSong = state.playSongList[CurrentMusicIndex];
+					uni.$store.commit('setPlaySongIndex',CurrentMusicIndex)
+                    let newCurrentSong = uni.$store.state.playSongList[CurrentMusicIndex];
                     let playload = {
                         id: newCurrentSong.id,
                         isRefresh: true
@@ -520,7 +540,7 @@ const playerStore = new HYEventStore({
                     this.dispatch('playMusicWithSongIdAction', playload); //判断是否是跳转的
 
                     state.isChangeMusic = true;
-					uni.$store.commit('setIsChangeMusic',true)
+					// uni.$store.commit('setIsChangeMusic',true)
                 }
             }
         },
@@ -536,14 +556,14 @@ const playerStore = new HYEventStore({
                 let currentPlayList = uni.$store.state.playSongList; //查找是否音乐列表中有该音乐
 
                 let musicItemIndex = currentPlayList.findIndex((item) => {
-                    return item.id === musicItem.id;
+                    return item.id == musicItem.id;
                 });
                 console.log(musicItemIndex); //音乐列表中有该音乐
 
                 if (musicItemIndex !== -1) {
                     state.playSongIndex = musicItemIndex;
 					uni.$store.commit('setPlaySongIndex',musicItemIndex)
-                    let newCurrentSong = state.playSongList[musicItemIndex];
+                    let newCurrentSong = uni.$store.state.playSongList[musicItemIndex];
                     let playload = {
                         id: newCurrentSong.id,
                         isRefresh: true
@@ -555,11 +575,14 @@ const playerStore = new HYEventStore({
                     currentPlayList.unshift(musicItem); //点击这个item之后就把他放进我们的播放列表中
 
                     state.playSongList = [];
-					
+					// uni.$store.commit('setPlaySongList', [])
                     state.playSongList = currentPlayList;
 					uni.$store.commit('setPlaySongList',currentPlayList)
                     state.playSongIndex = 0;
 					uni.$store.commit('setPlaySongIndex',0)
+					this.dispatch('saveMusicListIntoStorage')
+
+					
                 }
             }
         },
@@ -645,7 +668,7 @@ const playerStore = new HYEventStore({
 	//更新通知栏
 	updateNotification(state){
 		console.log('更新');
-		let music=state.music
+		let music=uni.$store.state.music
 		let artist =music.artistVoList.map((item)=>{
 			return item.name
 		})
@@ -680,7 +703,7 @@ const playerStore = new HYEventStore({
 			plus.globalEvent.addEventListener('musicNotificationPause', (event) => {
 				console.log("暂停或播放按钮事件回调", event);
 				console.log('转换');
-				let isPlay=!state.isPlay
+				let isPlay=!uni.$store.state.isPlay
 				this.dispatch('changeMusicPlayState',isPlay)
 			});
 			// 监听播放上一首按钮事件回调

@@ -303,15 +303,13 @@ export default {
         };
     },
 	computed:{
-		...mapState(['music','formatTime','value','currentTime','totalTime','isPlay','lycArray','currentLycIndex','toLyc','isDoubleLanguage','playSongList','playSongIndex'])
-		// ...mapState({
-		// 	music:state=>state.music,
-		// 	formatTime:state=>state.formatTime
-		// })
+		...mapState(['music','formatTime','value','currentTime','totalTime','isPlay','lycArray',,'isDoubleLanguage','playSongList','playSongIndex']),
 		
-		// music(){
-		// 	return uni.$store.state.music
-		// },
+		...mapState({
+			toLyc:state=>state.toLyc,
+			currentLycIndex:state=>state.currentLycIndex
+		})
+
 		// formatTime(){
 		// 	return uni.$store.state.formatTime
 		// },
@@ -323,11 +321,7 @@ export default {
 		// },
 	},
 	watch:{
-		 listenMusicData(newVal, oldVal) {
-		 // 此处处理逻辑
-		   this.music = uniapp.$store.state.music
-		
-		 }
+
 	},
     /**
      * 生命周期函数--监听页面加载

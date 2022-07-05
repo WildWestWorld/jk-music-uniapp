@@ -19,7 +19,7 @@
 			"style": {}
 		},
 		{
-			"path": "pages/play-list/detail",
+			"path": "pages/play-list/index",
 			"style": {}
 		},
 		{
@@ -37,10 +37,44 @@
                         "color": "#0041c4"
                     }
 					
+					
 				}
 			
 			}
+		},
+		{
+			"path": "pages/album/detail",
+			"style": {
+				"enablePullDownRefresh": true,
+				 
+					"app-plus": { 
+				      "pullToRefresh": { 
+				          "style": "circle",
+				          "color": "#0041c4"
+				      }
+									
+									
+					}
+			}
+			
+		},
+		{
+			"path": "pages/play-list/detail",
+			"style": {
+				"enablePullDownRefresh": true,
+				 
+					"app-plus": { 
+				      "pullToRefresh": { 
+				          "style": "circle",
+				          "color": "#0041c4"
+				      }
+									
+									
+					}
+			}
+			
 		}
+		
 	],
 	"tabBar": {
 		"custom": false,

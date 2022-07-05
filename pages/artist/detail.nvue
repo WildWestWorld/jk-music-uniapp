@@ -102,14 +102,39 @@
 				
 						<swiper-item class="tab-content-item">
 							<view class="tab-list-container" >
-								<list ref="album-list" class="list" :offset-accuracy="5" bounce="true" fixFreezing="true" >
-
-									<refresh>
-									  <text>Refreshing</text>
-									  <loading-indicator></loading-indicator>
-									</refresh>
-									
+								<list ref="album-list" class="list" :offset-accuracy="5" bounce="true" fixFreezing="true" >									
 									<cell>
+										<view class="total-album-container" v-if="albumVoList.length>0">
+								
+
+											
+											
+											<view class="double-album-container" >
+												
+
+												
+
+												
+
+												<view class="album-container">
+													<view class="album-img-container">
+														<img class="album-img" :src="albumVoList[0].photo.url" ></img>
+														<view class="album-name">
+															<text class="album-name-text">{{albumVoList[0].name}}</text>
+														</view>
+														
+														<view class="album-music-length-name">
+															<text class="album-artist-text">{{albumVoList[0].albumArtistList[0].name}}·</text>
+															<text class="album-music-length-text">{{albumVoList[0].musicVoList.length}}首</text>
+														</view>
+														
+													</view>
+												</view>
+												
+												
+											</view>
+											
+										</view>	
 
 									</cell>
 								</list>
@@ -202,7 +227,8 @@ import { getArtistById } from '../../api/artist';
 				previousTabIndex:0,
 				
 				artist:null,
-				musicList:null
+				musicVoList:null,
+				albumVoList:null,
 			}
 		},
 		onReady(){
@@ -247,8 +273,10 @@ import { getArtistById } from '../../api/artist';
 			getArtistById(id).then((res)=>{
 				this.artist=res.data
 				this.musicVoList=res.data.musicVoList
-				console.log(this.artist);
+				this.albumVoList=res.data.albumVoList
+				console.log('数据',this.artist);
 				console.log(this.musicVoList);
+				console.log('专辑',this.albumVoList);
 			})
 			
 			
@@ -771,7 +799,7 @@ import { getArtistById } from '../../api/artist';
 						
 					width: 72rpx;
 					height: 8rpx;
-					background-color:  red;
+					background-color:  #0041c4;
 					
 					/* transition-duration: 0.15s; */
 					transition-property:transform,left;
@@ -793,6 +821,50 @@ import { getArtistById } from '../../api/artist';
 	flex: 1;
 	flex-direction: column;
 }
+/* 下面是专辑的样式 */
+.total-album-container{
+	margin-top: 20rpx;
+	display: flex;
+	flex-direction: column;
+	margin-left:10rpx ;
+	margin-right:10rpx ;
+}
+.double-album-container{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content:space-between;
+	align-items: center;
+}
 
-	
+.album-container{
+	width: 350rpx;
+}
+.album-img-container{
+}
+.album-img{
+	height: 350rpx;
+	width: 350rpx;
+}
+.album-name-text{
+	color: black;
+	font-size: 30rpx;
+	font-weight: 400;
+}
+.album-music-length-name{
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+}
+.album-artist-text{
+	color: rgb(193, 192, 192);
+	font-weight: 400;
+	font-size: 30rpx;
+}
+.album-music-length-text{
+	color: rgb(193, 192, 192);
+	font-weight: 400;
+	font-size: 30rpx;
+}
 </style>

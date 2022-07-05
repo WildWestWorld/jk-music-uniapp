@@ -73,6 +73,10 @@ export default {
     onShareAppMessage() {},
     methods: {
        onTab() {
+		   
+
+		   
+		   
             let id = this.item.id;
             uni.navigateTo({
                 url: `/pages/music-player/detail?id=${this.item.id}&musicName=${this.item.name}&artistName=${this.item.artistVoList[0].name}`
@@ -93,7 +97,7 @@ export default {
 			let index=this.dataIndex
 			console.log(index)
 			playerStore.setState("playSongIndex",index)
-			  
+			uni.$store.commit('setPlaySongIndex',index)
 			// playerStore.setState("playSongList",this.data.JKRecommandMusicList)
 			  
 			//拿到item信息

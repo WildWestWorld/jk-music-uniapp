@@ -132,7 +132,8 @@ import  JKMusicList  from "../../components/common/JKMusicList/index"
 // 获取应用实例
 const app = getApp();
 
-
+import {mapState} from 'vuex'
+ 
 export default {
 	components:{
 		muscianBanner,
@@ -214,18 +215,24 @@ export default {
 	JKRecommandAlbumList:null,
 	JKRecommandPlayList:null,//歌单
     message:'hello world!',
-    currentMusic:{},
-    isPlay:false,
+    // currentMusic:{},
+    // isPlay:false,
     playAnimState:"paused",
     
     playSongList:[],
     playSongIndex:0,
     showMusicList:false,
   };
-    }
+    },
+	computed:{
+				...mapState({
+					currentMusic:state=>state.music,
+					isPlay:state=>state.isPlay
+				 })
+	},
     /**
      * 生命周期函数--监听页面加载
-     */,
+     */
     onLoad() {
 
 		
@@ -283,6 +290,7 @@ export default {
      * 用户点击右上角分享
      */
     onShareAppMessage() {},
+	
     methods: {
 
 
@@ -392,21 +400,21 @@ export default {
   //监听专区
   watchPlayerStoreListener(){
   
-        //监听currentSong的信息
-  playerStore.onStates(["music","isPlay"],({music,isPlay})=>{
-          if(music !== undefined){
-            this.setData({
-              currentMusic:music
-            })
-          }
+  //       //监听currentSong的信息
+  // playerStore.onStates(["music","isPlay"],({music,isPlay})=>{
+  //         if(music !== undefined){
+  //           this.setData({
+  //             currentMusic:music
+  //           })
+  //         }
     
-          if(isPlay !== undefined){
-            this.setData({
-              isPlay:isPlay,
-              playAnimState:isPlay?"running":"paused"
-            })
-          }
-  })
+  //         if(isPlay !== undefined){
+  //           this.setData({
+  //             isPlay:isPlay,
+  //             playAnimState:isPlay?"running":"paused"
+  //           })
+  //         }
+  // })
   //歌单相关变量监听
   playerStore.onStates(["playSongList","playSongIndex"],({playSongList,playSongIndex})=>{
     if(playSongList!== undefined&&playSongList !== null){   this.setData({playSongList:playSongList})}

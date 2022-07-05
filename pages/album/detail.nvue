@@ -1,0 +1,818 @@
+<template>
+
+	
+	<!-- <view class="page" :style="'top:'+ safeAreaTop +'px;'+'height:'+contentHeight+'px'" > -->
+		<view :style="'height:'+ safeAreaTop +'px;'">
+			
+		</view>
+		
+		<list  id="page" class="page-list" :bounce="false" fixFreezing="true"  v-if="album">
+
+
+				
+			<cell>
+<!-- 					<view :style="'height:'+ safeAreaTop +'px;'">
+						
+					</view> -->
+				<view class="image-container" :style="'width:'+screenWidth">
+					
+					<view class="album-page-icon" v-if="false">
+						<image  class="play-icon"  src="/static/images/play-music-play.png"></image>
+					</view>
+					
+					<view class="image-pic" :style="'width:'+screenWidth">
+						<image class="album-image" :src="album.photo.url||'/static/images/test.jpeg'" mode="hegihtFix" ></image>
+					</view>
+					<view  class="image-bgc" :style="'width:'+screenWidth">				
+					</view>
+					
+					<view class="aritst-info">
+						<text class="aritst-info-text">Album</text>
+					</view>
+					
+					<view class="aritst-name">
+						<text class="aritst-name-text">{{album.name}}</text>
+					</view>
+				</view>
+			</cell>
+			
+		 <cell>
+			 
+
+		<!-- Tab组件-->
+		<view class="tabs-container" :style="'height:'+contentHeight+'px'">
+			<scroll-view     class="tabs" scroll-x :show-scrollbar="false" :enhanced="true" :scroll-into-view="toTab" :scroll-left="scrollLeft">
+				<view class="tab-item-container">
+					<view
+						:class="currentTabIndex == index ? 'current-tab-item' : 'tab-item'"
+						:data-clickItemIndex="index"
+						@tap="changeCurrentTabIndex"
+						:id="'Tab' + index"
+						:scroll-left="scrollRight"
+						v-for="(item, index) in tabList"
+						:key="index"
+						
+					>
+					<!-- Tab的滑块 -->
+						<view class="tab-item-content" id="test">
+						
+						 <text   :class="currentTabTextIndex == index ? 'current-tab-item-text' : 'tab-item-text'">{{ item }}</text>
+						</view>
+					</view>
+					<view class="scroll-bar-container" :style="'width:'+screenWidth">
+						<view   v-if="isTap" class="click-scroll-bar"  :style="'left:' +  (85 + 170 * (currentTabIndex + scrollPercent)) + 'rpx;'+'transform:translateX(-50%)' "></view>
+						<view   v-if="!isClick" class="scroll-bar"  :style="'left:' +  (85 + 170 * (currentTabIndex + scrollPercent )) + 'rpx;'+'transform:translateX(-50%)' "></view>
+					<!-- <view class="scroll-bar"   :style="'transform:translateX(' +  (85 + 170 * (currentTabIndex + scrollPercent)) + 'rpx;'+'left:-40rpx' "></view> -->
+					</view>
+				</view>
+			</scroll-view>
+			<!-- 0.5px的灰线 -->
+			<view class="tab-bar-line" :style="'width:'+screenWidth"></view>
+			
+			<!--  fixFreezing="true" 用于IOS修复 -->
+			<!-- bounce 控制是否回弹效果, iOS 不支持动态修改	 -->
+			
+			
+				<!-- TabContent  -->
+					<swiper class="tab-content"
+						@transition="watchSwiperItemPositon"
+						@animationfinish="watchSwiperAnimationFinish"
+						@change="watchSwiperChange"
+						:current="currentTabIndex"
+						 
+					>
+						<swiper-item class="tab-content-item" >
+
+							<!-- <view class="tab-list-container" > -->
+								
+
+								<list ref="music-list" class="list" :offset-accuracy="5" bounce="true" fixFreezing="true" >
+
+
+
+									
+									<cell>
+										<musicItemNvue  :item="item"  v-for="(item,index) in musicVoList" :key="index" ></musicItemNvue>
+
+									</cell>
+								</list>
+								
+							<!-- </view> -->
+						</swiper-item>
+				
+
+				
+					</swiper>
+			
+		</view>
+		
+
+			</cell>
+		</list>
+		
+	</view>
+</template>
+
+<script>
+import JKNavigator from '../../components/common/JKNavigator/index.vue';
+import JKLoading from '../../components/common/JKLoading/index';
+import JKEnding from '../../components/common/JKEnding/index';
+import playBar from '../../components/index/play-bar/index';
+import musicItem from '../../components/lib/music-item/index';
+import musicItemNvue from '../../components/lib/music-item/nIndex';
+
+
+import { getAlbumById } from '../../api/album';
+// import { debounce } from '../../store/index.js';
+
+
+	export default {
+		components: {
+		    JKNavigator,
+			JKLoading,
+			JKEnding,
+			playBar,
+			musicItem,
+			musicItemNvue,
+		},
+		data(){
+			return{
+				safeAreaTop:0,
+				screenHeight:0,
+				
+				
+				contentHeight: 0,
+				 contentTop: 0,
+				 deviceRadio: 0,
+				 tabList: ['歌曲'],
+				 currentTabIndex: 0,
+				 currentTabTextIndex: 0,
+				 toTab: 'Tab0',
+				 scrollLeft: 0,
+				
+				 //tab标题的滚动条位置
+				 screenWidth: 0,
+				
+				 scrollPercent: 0,
+				 isClick: false,
+				 isTap:true,
+				 
+				 currentMusic: {},
+				 isPlay: false,
+				 playAnimState: 'paused',
+				 playSongList: [],
+				 playSongIndex: 0,
+				 musicList: [],
+				 test: '',
+				 scrollRight: '',
+				 
+				 //sroll view 下拉加载是否触发的控制变量（页面绑定）
+				 triggeredMusicList:false,
+				 pageNumMusicList:1,
+				 
+				 //控制music里面的数据完全请求完了，的变量
+				 isMusicListOver:false,
+				 
+				 //显示loading-icon的变量
+				 showLoading:false,
+				 //显示ending的变量
+				 showEnding:false,
+				 
+				 scrollRefresherEnabled:false,
+
+
+				previousScrollPercent:0,
+				previousTabIndex:0,
+				
+				album:null,
+				musicVoList:null,
+				albumVoList:null,
+			}
+		},
+		onReady(){
+			
+				this.initScrollRef()
+				
+			// const query = uni.createSelectorQuery();
+			// query.selectAll('#test').boundingClientRect();
+			// query.selectViewport().scrollOffset();
+			// query.exec((res) => {
+			// 	console.log(res);
+			// 	let currentTabIndex = this.currentTabIndex;
+
+			// 	console.log(this.test);
+			// });
+			
+			// this.$nextTick(()=>{
+			// 	this.selectorQuery();
+			// })
+		},
+
+		onLoad(option){
+		
+			
+			// this.setScrollRef();
+			let info = uni.getWindowInfo()
+			console.log(info);
+			let safeAreaTop=info.safeArea.top
+			let screenHeight= info.screenHeight
+			let screenWidth= info.screenWidth
+			// let tabHight = screenHeight - safeAreaTop- uni.upx2px(684.5)
+			let tabHight = screenHeight - safeAreaTop
+			this.contentHeight=screenHeight- safeAreaTop
+			
+			this.safeAreaTop=safeAreaTop
+			this.tabHight = tabHight	
+			this.screenWidth = screenWidth
+			
+			//获取album
+			console.log(option);
+			let id = option.id
+			getAlbumById(id).then((res)=>{
+				this.album=res.data
+				this.musicVoList=res.data.musicVoList
+				console.log(res);
+				console.log(this.album);
+			})
+			
+			
+			// this.queryTabItem()
+
+			
+		},
+		// 下拉刷新 需要在page.json中设置下拉刷新的选项为true
+		onPullDownRefresh() {
+			
+			console.log('refresh');
+			setTimeout(function () {
+				uni.stopPullDownRefresh();
+			}, 1000);			
+			
+		},
+		methods:{
+			//自定义函数区
+			
+			//防抖
+			 debounce(func, delay) {
+			      let that = this // this指向发生变化，需要提出来
+			      let args = arguments
+			      return function () {
+			        if (that.timeout) {
+			          clearTimeout(that.timeout)
+			        }
+			        that.timeout = setTimeout(() => {
+			          func.apply(that, args)
+			        }, delay)
+			  }()// 注意:我加了()
+			},
+			
+			//改变当前Tab的Index值（页面绑定）
+			changeCurrentTabIndex(event) {
+				
+				// this.setScrollRef();
+			    let clickItemIndex = event.target.dataset.clickItemIndex;
+				console.log(event);
+				console.log(clickItemIndex);
+				console.log(this.scrollPercent);
+				 clickItemIndex=parseInt(clickItemIndex)
+			    if (clickItemIndex !== undefined && clickItemIndex !== null) {
+					this.currentTabIndex=clickItemIndex
+					this.currentTabTextIndex=clickItemIndex
+					this.isClick=true
+					this.isTap=true
+					this.scrollPercent=0
+			    } //如果点击的Item的索引在第四个，就引动
+				let that =this
+				
+				this.debounce(function(){
+					that.isClick=false
+					console.log('触发');
+				},800)
+				
+			    if (clickItemIndex >= 3) {
+					this.scrollLeft=400
+
+			    } else {
+					this.scrollLeft=0
+
+			    }
+			},
+			
+			//监控当前SwiperItem滑动的位置(页面绑定)
+			watchSwiperItemPositon(event) {
+			    let intDx = parseInt(event.detail.dx);
+				let screenWidth=this.screenWidth
+			
+				
+			    let scrollPercent = Math.floor(((intDx / screenWidth) * 10000) / 100) / 100; // scrollPercent=scrollPercent%1
+			    // let previousScrollPercent=this.previousScrollPercent
+				// console.log(event)
+				
+				
+				console.log(screenWidth);
+				
+				// let isTap=this.isTap;
+				
+				
+				
+			    let isClick = this.isClick;	
+				// let offset =Math.abs(scrollPercent - previousScrollPercent)  
+				
+
+				
+			    if (scrollPercent != 0 && isClick === false ) {
+					console.log(scrollPercent);
+					this.scrollPercent=scrollPercent
+					this.isTap=false
+					// this.isClick=false
+					// this.previousScrollPercent=scrollPercent
+			    }
+				
+			},
+			
+			//监控当前Swiper动画完成(页面绑定)
+			watchSwiperAnimationFinish(event) {
+				this.setScrollRef();
+				
+			    let currentSwiperItemIndex = event.detail.current;
+				// let previousTabIndex=this.previousTabIndex
+				
+				 currentSwiperItemIndex=parseInt(currentSwiperItemIndex)
+				 
+				//  let offset =Math.abs(currentSwiperItemIndex - previousTabIndex)
+			    if (currentSwiperItemIndex !== undefined && currentSwiperItemIndex !== null) {
+			        this.currentTabIndex=currentSwiperItemIndex
+					this.currentTabTextIndex=currentSwiperItemIndex
+					// this.previousTabIndex=currentSwiperItemIndex
+					this.scrollPercent=0
+					this.isTap=true
+					// this.isClick=false
+			    }
+			    if (currentSwiperItemIndex >= 3) {
+					this.scrollLeft=400
+
+			    } else {
+					this.scrollLeft=0
+
+			    }
+			},
+			
+			//检测swiper数值改变
+			watchSwiperChange(event) {
+				let currentSwiperItemIndex=event.detail.current
+				console.log(event);	
+				
+				//  let offset =Math.abs(currentSwiperItemIndex - previousTabIndex)
+				if (currentSwiperItemIndex !== undefined && currentSwiperItemIndex !== null ) {
+				    this.currentTabTextIndex=currentSwiperItemIndex
+					
+
+					this.isTap=true
+					// this.isClick=false
+					// this.previousTabIndex=currentSwiperItemIndex
+					// this.scrollPercent=0
+					// this.isClick=true
+				
+				}
+			},
+			selectorQuery(){
+				uni.createSelectorQuery().in(this).select('#test').boundingClientRect().exec(rect => {
+				    console.log(rect);
+				});
+			},
+			
+			//查询tab-item的宽度
+			queryTabItem() {
+				const query = uni.createSelectorQuery();
+				query.selectAll('.tab-item-content').boundingClientRect();
+				query.selectViewport().scrollOffset();
+				query.exec((res) => {
+					console.log(res);
+					let currentTabIndex = this.currentTabIndex;
+					this.setData({
+						test: res[0][currentTabIndex].width
+					});
+					console.log(this.test);
+				});
+			},
+			//自定义下拉刷新被触发(页面绑定)
+			onFreshMusicList(){
+				console.log("下拉被触发")
+				//隐藏 无更多数据的样式
+				this.showEnding=false
+				//隐藏 加载icon的样式
+				this.showLoading=false
+				
+				this.triggeredMusicList=true
+				this.isMusicListOver=false
+				this.pageNumMusicList=1
+				let pageNumMusicList=this.pageNumMusicList
+				//重新请求页面
+				let data = {
+					pageNum: pageNumMusicList,
+					pageSize: 15,
+					searchWord: ''
+				};
+
+				getPageByMusicName(data).then((res) => {
+					console.log(res.data.records);
+				
+					if (res.data.records !== undefined && res.data.records !== null) {
+						this.setData({
+							musicList: res.data.records,
+							triggeredMusicList:false
+						});
+					}
+				});
+				
+				
+			},
+			//自定义下拉刷新控件被下拉(页面绑定)(暂时无用)
+			onPullingMusicList(event){
+				
+			},
+			//页面到底部了
+			onBottomMusicList(){
+				console.log('到底了')
+				
+				//显示加载图标
+				this.showLoading=true
+					
+				//获取当前的pageNum
+				let pageNumMusicList=this.pageNumMusicList
+				pageNumMusicList=pageNumMusicList+1
+				
+				//重新请求页面
+				let data = {
+					pageNum: pageNumMusicList,
+					pageSize: 15,
+					searchWord: ''
+				};
+				let isMusicListOver=this.isMusicListOver
+				
+
+				
+				if(!isMusicListOver){
+
+					
+					getPageByMusicName(data).then((res) => {
+					
+					
+						if (res.data.records !== undefined && res.data.records !== null &&  res.data.records.length > 0) {
+							let musicList=this.musicList					
+							//获取的是个对象所以要map一下
+							let newRes=res.data.records
+					
+							newRes.map((item,index)=>{
+								musicList.push(item)
+							})
+							
+							this.pageNumMusicList=pageNumMusicList
+							
+							//隐藏加载图标
+							this.showLoading=false
+					
+						}else{
+							console.log('没有歌了')
+							this.isMusicListOver=true
+							
+							
+							//隐藏加载图标
+							this.showLoading=false
+							
+							//显示 无更多数据的样式
+							this.showEnding=true
+							
+
+						}
+						
+					})
+				}else{
+					//显示加载图标
+					this.showLoading=false
+				}
+		
+
+				
+			},
+			onScroll(event){
+
+			},
+			// 吸顶设置专区
+			//初始化吸顶高度
+			initScrollRef(height){
+				let headerHeight = uni.upx2px(684.5)
+				setTimeout(()=>{
+					if (this.$refs['music-list'].setSpecialEffects) {
+					
+						console.log('Success');
+						
+					    this.$refs['music-list'].setSpecialEffects({
+					        id:'page',
+					        headerHeight: headerHeight
+					    });
+						
+					}
+				},1000)
+				clearTimeout()
+			},
+			//设置吸顶的高度
+			setScrollRef(height) {
+				let currentTabTextIndex=this.currentTabTextIndex
+				console.log(currentTabTextIndex);
+				
+				let headerHeight = uni.upx2px(684.5)
+				
+			    if (this.$refs['music-list'].setSpecialEffects && currentTabTextIndex === 0) {
+					console.log('Success');
+					
+			        this.$refs['music-list'].setSpecialEffects({
+			            id:'page',
+			            headerHeight: headerHeight
+			        });
+			    }
+				
+
+				
+			},
+			
+			
+			
+			
+		},
+		
+
+	}
+</script>
+
+<style >
+	.page{
+		font-family: AppleGothic;
+		position: relative;
+	}
+	.image-container{
+		width: 750rpx;
+		height: 684.5rpx;
+
+
+	}
+	.image-bgc{
+		top: 0;
+		left: 0;
+		position: absolute;
+		width: 750rpx;
+		height: 684.5rpx;
+		opacity: 0.5;
+
+		background-image: linear-gradient(to bottom, white, black); 
+	}
+	.image-pic{
+		width: 750rpx;
+		height: 684.5rpx;
+
+	}
+	.album-image{
+		width: 750rpx;
+		height: 684.5rpx;
+		
+		
+	}
+	.aritst-info{
+		position: absolute;
+
+		
+		top: 482rpx;
+		left: 32rpx;
+		
+
+	}
+	.aritst-info-text{
+		opacity: 0.65;
+		color: #FFFFFF;
+		font-family: AppleGothic;
+		font-size: 36rpx;
+		font-weight: 400;
+		
+	
+	}
+	.aritst-name{
+		position: absolute;
+		width: 750rpx;
+		top: 526rpx;
+		left: 32rpx;
+	}
+	.aritst-name-text{
+		color: rgb(255, 255, 255);
+		font-family: AppleGothic;
+		font-size: 68rpx;
+		font-weight: 400;
+		line-height: 80rpx;
+		overflow: hidden;
+		text-overflow:ellipsis;
+	}
+	.album-page-icon{
+		position: fixed;
+
+		top: 614rpx;
+		left: 578rpx;
+		z-index: 9999;
+	}
+	.play-icon{
+
+		width: 140rpx;
+		height: 140rpx;
+		z-index: 9999;
+	}
+	
+	
+	/* #ifndef APP-PLUS */
+	page {
+	    width: 100%;
+	    min-height: 100%;
+	    display: flex;
+	}
+	
+	/* #endif */
+	
+	
+	.page-list{
+		flex: 1;
+	}
+	
+	
+	/* 该部分为Tab的样式 */
+	.tabs-container {
+	    background-color: #fff;
+		  overflow: hidden;
+		  flex-direction: column;
+		/* #ifdef MP-ALIPAY || MP-BAIDU */
+		height: 100vh;
+		/* #endif */
+	}
+	.tabs {
+	        height: 100rpx;
+	        position: relative;
+	}
+
+	        .tab-item-container {
+	            display: flex;
+	            flex-direction: row;
+	            position: relative;
+				height: 100rpx;
+				}
+				
+	            .tab-item {
+	                display: flex;
+	                flex-direction: row;
+	                align-items: center;
+	                justify-content: center;
+	
+	                color: #999;
+	                font-weight: 400;
+	                font-size: 32rpx;
+					width: 170rpx;
+	
+	            }
+				.tab-item-text{
+					color: #999;
+					font-weight: 400;
+					font-size: 32rpx;
+					flex-wrap: nowrap;
+					/* #ifndef APP-PLUS */
+					white-space: nowrap;
+					/* #endif */
+				}
+	            .current-tab-item {
+	                display: flex;
+	                flex-direction: row;
+	                align-items: center;
+	                justify-content: center;
+	
+	                color: #0041c4;
+	                font-size: 36rpx;
+	                font-weight: bold;
+	
+	               width: 170rpx;
+
+	            }
+				
+				.tab-bar-line{
+				    width: 100%;
+				    content: '';	
+				    position: absolute;
+					
+					 border-width: 2rpx;
+					 border-style: solid;
+					 border-color: grey;
+					 opacity:0.3;
+				    border-bottom: 2rpx solid rgba($color: grey, $alpha: 0.3);
+				    transform: scaleY(0.5);
+				    -webkit-transform: scaleY(0.5);
+				    bottom: 0;
+				    left: 0;
+				}
+				
+				
+				.current-tab-item-text{
+					color: #0041c4;
+					font-size: 36rpx;
+					font-weight: bold;
+					flex-wrap: nowrap;
+					/* #ifndef APP-PLUS */
+					white-space: nowrap;
+					/* #endif */
+				}
+	
+	            .scroll-bar-container {
+	                position: absolute;
+	                bottom: 0;
+	                height: 8rpx;
+					
+					}
+	            .scroll-bar {
+	                    position: relative;
+	
+						width: 72rpx;
+	                    height: 8rpx;
+	                    background-color: #0041c4;
+						
+	                    /* transition-duration: 0.15s; */
+						transition-property:transform;
+						transition-duration:150ms;
+	                    border-radius: 8rpx;
+					
+				}
+				.click-scroll-bar{
+					position: absolute;
+						
+					width: 72rpx;
+					height: 8rpx;
+					background-color:  #0041c4;
+					
+					/* transition-duration: 0.15s; */
+					transition-property:transform,left;
+					transition-duration:150ms;
+					border-radius: 8rpx;
+				}
+
+
+/* tab-content */
+.tab-content{
+	flex: 1;
+}
+
+.tab-content-item{
+	flex: 1;
+	flex-direction: column;
+}
+.tab-list-container{
+	flex: 1;
+	flex-direction: column;
+}
+/* 下面是专辑的样式 */
+.total-album-container{
+	margin-top: 20rpx;
+	display: flex;
+	flex-direction: column;
+	margin-left:10rpx ;
+	margin-right:10rpx ;
+}
+.double-album-container{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content:space-between;
+	align-items: center;
+}
+
+.album-container{
+	width: 350rpx;
+}
+.album-img-container{
+}
+.album-img{
+	height: 350rpx;
+	width: 350rpx;
+}
+.album-name-text{
+	color: black;
+	font-size: 30rpx;
+	font-weight: 400;
+}
+.album-music-length-name{
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+}
+.album-album-text{
+	color: rgb(193, 192, 192);
+	font-weight: 400;
+	font-size: 30rpx;
+}
+.album-music-length-text{
+	color: rgb(193, 192, 192);
+	font-weight: 400;
+	font-size: 30rpx;
+}
+</style>

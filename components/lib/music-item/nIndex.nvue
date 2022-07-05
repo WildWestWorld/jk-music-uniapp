@@ -65,7 +65,7 @@
 				let index=this.dataIndex
 				console.log(index)
 				playerStore.setState("playSongIndex",index)
-				  
+				  uni.$store.commit('setPlaySongIndex',index)
 				// playerStore.setState("playSongList",this.data.JKRecommandMusicList)
 				  
 				//拿到item信息
@@ -91,7 +91,6 @@
 			console.log(item);
 			// console.log(item.artistVoList);
 			
-			console.log(123);
 			console.log(this.$props.item);
 		}
 	}

@@ -33,7 +33,8 @@ export default new Vuex.Store({
 		
 		currentSong: null,
 		isChangeMusic:false,
-		
+		isFirstPlay: true,
+		isCreateNotification:false
     },
     mutations: {
         setHasLogin(state, value){
@@ -91,6 +92,12 @@ export default new Vuex.Store({
 		},
 		setPlayModeIndex(state,value){
 			state.playModeIndex=value
+		},
+		setIsFirstPlay(state,value){
+			state.isFirstPlay=value
+		},
+		setIsCreateNotification(state,value){
+			state.isCreateNotification=value
 		}
     },
     actions: {},

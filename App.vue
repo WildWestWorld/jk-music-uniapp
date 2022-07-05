@@ -96,7 +96,16 @@ import { getToken } from './utils/auth'; // app.ts
                 // }
             } //获取store里面playSongList
         },
+		onHide(){
+			// console.log('yinc');
+			// if(uni.$store.state.music){
+			// 	playerStore.dispatch('createNotification')
+				
+			// 	playerStore.dispatch('updateNotification')
+			// 	playerStore.dispatch('watchNotificaiton')
+			// }
 
+		},
         onUnload() {
 			playerStore.dispatch('closeNotificaiton')
 		}

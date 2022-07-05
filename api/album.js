@@ -1,5 +1,5 @@
 import { get, getWithParams } from './request';
-export const getAlbum = (id) => {
+export const getAlbumById = (id) => {
     return get(`/album/${id}`);
 };
 

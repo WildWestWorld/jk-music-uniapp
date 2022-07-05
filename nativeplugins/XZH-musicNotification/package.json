@@ -1,7 +1,7 @@
 {
 	"name": "XZH-musicNotification",
 	"id": "XZH-musicNotification",
-	"version": "3.0.4",
+	"version": "3.0.5",
 	"description": "Android音乐通知栏",
 	"_dp_type": "nativeplugin",
 	"_dp_nativeplugin": {

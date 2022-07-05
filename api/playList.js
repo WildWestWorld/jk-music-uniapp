@@ -1,5 +1,5 @@
 import { get, getWithParams } from './request';
-export const getPlayList = (id) => {
+export const getPlayListById = (id) => {
     return get(`/playlist/${id}`);
 };
 

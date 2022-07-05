@@ -1,7 +1,7 @@
 <template>
     <!-- bindtap绑定一个手机的点击事件，后面我们会把他转成click事件被上层的bindclick捕获 -->
 	
-		<view class="recommand-card" >
+		<view class="recommand-card"  @tap="onTab">
 			<image :src="item.photo.url" class="image"></image>
 			<view class="name-container">
 				<view class="name">{{ item.name }}</view>
@@ -47,17 +47,17 @@ export default {
         onTab() {
             let id = this.item.id;
             uni.navigateTo({
-                url: `/pages/music-player/detail?id=${this.item.id}&musicName=${this.item.name}&artistName=${this.item.artistVoList[0].name}`
+                url: `/pages/album/detail?id=${this.item.id}`
             }); //对歌曲进行数据请求
 			
 
-            let payload = {
-                id: id
-            };
-            playerStore.dispatch('playMusicWithSongIdAction', payload); //获取当前的歌曲列表/当前歌曲的索引
+   //          let payload = {
+   //              id: id
+   //          };
+   //          playerStore.dispatch('playMusicWithSongIdAction', payload); //获取当前的歌曲列表/当前歌曲的索引
 			
-			//将音乐放入的播放音乐列表中
-			this.addNewMusicInMusicList()
+			// //将音乐放入的播放音乐列表中
+			// this.addNewMusicInMusicList()
         },
 		//子函数
 		//将音乐放入的播放音乐列表中

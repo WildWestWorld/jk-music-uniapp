@@ -100,6 +100,8 @@ import musicItemNvue from '../../components/lib/music-item/nIndex';
 import { getPageByMusicName } from '../../api/music';
 import { debounce, playerStore, throttle } from '../../store/index'; // pages/lib/index.ts
 
+import {mapState} from 'vuex'
+
 const app = getApp();
 export default {
     components: {
@@ -126,8 +128,8 @@ export default {
 
             scrollPercent: 0,
             isClick: false,
-            currentMusic: {},
-            isPlay: false,
+            // currentMusic: {},
+            // isPlay: false,
             playAnimState: 'paused',
             playSongList: [],
             playSongIndex: 0,
@@ -150,6 +152,12 @@ export default {
 			
         };
     },
+	computed:{
+		...mapState({
+			currentMusic:state=>state.music,
+			isPlay:state=>state.isPlay
+		 })
+	},
     onLoad() {
         //监听
         this.watchPlayerStoreListener(); //计算页面容器的高度
@@ -427,21 +435,21 @@ export default {
 		
         //监听专区
         watchPlayerStoreListener() {
-            //监听currentSong的信息
-            playerStore.onStates(['music', 'isPlay'], ({ music, isPlay }) => {
-                if (music !== undefined) {
-                    this.setData({
-                        currentMusic: music
-                    });
-                }
+            // //监听currentSong的信息
+            // playerStore.onStates(['music', 'isPlay'], ({ music, isPlay }) => {
+            //     if (music !== undefined) {
+            //         this.setData({
+            //             currentMusic: music
+            //         });
+            //     }
 
-                if (isPlay !== undefined) {
-                    this.setData({
-                        isPlay: isPlay,
-                        playAnimState: isPlay ? 'running' : 'paused'
-                    });
-                }
-            }); //歌单相关变量监听
+            //     if (isPlay !== undefined) {
+            //         this.setData({
+            //             isPlay: isPlay,
+            //             playAnimState: isPlay ? 'running' : 'paused'
+            //         });
+            //     }
+            // }); //歌单相关变量监听
 
             playerStore.onStates(['playSongList', 'playSongIndex'], ({ playSongList, playSongIndex }) => {
                 if (playSongList !== undefined && playSongList !== null) {
