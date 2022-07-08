@@ -73,8 +73,23 @@
 					}
 			}
 			
+		},
+		{
+			"path": "pages/lib/detail",
+			"style": {
+				"enablePullDownRefresh": true,
+				 
+					"app-plus": { 
+				      "pullToRefresh": { 
+				          "style": "circle",
+				          "color": "#0041c4"
+				      }
+									
+									
+					}
+			}
+			
 		}
-		
 	],
 	"tabBar": {
 		"custom": false,
@@ -97,7 +112,7 @@
 			{
 				"iconPath": "static/images/libV2.png",
 				"selectedIconPath": "static/images/libV2-active.png",
-				"pagePath": "pages/lib/index",
+				"pagePath": "pages/lib/detail",
 				"text": "音乐库"
 			}
 		]

@@ -107,7 +107,7 @@ import { getToken } from './utils/auth'; // app.ts
 
 		},
         onUnload() {
-			playerStore.dispatch('closeNotificaiton')
+			uni.$store.dispatch('closeNotificaiton')
 		}
     };
 </script>

@@ -1,0 +1,148 @@
+<template>
+	<!-- album卡片 -->
+
+												
+
+												
+
+												<view class="album-container">
+													<view class="album-img-container">
+														<img class="album-img" :src="item.photo.url" ></img>
+														<view class="album-name">
+															<text class="album-name-text">{{item.name}}</text>
+														</view>
+														
+														<view class="album-music-length-name">
+															<text class="album-artist-text">{{item.albumArtistList[0].name}}·</text>
+															<text class="album-music-length-text">{{item.musicVoList.length}}首</text>
+														</view>
+														
+													</view>
+												</view>
+												
+												
+
+		
+	
+
+	
+
+</template>
+
+<script>
+	import { playerStore } from '../../../store/player-store';
+	export default {
+		data(){
+			return{
+				artist:null
+			};
+		},
+		props:{
+			item:{
+				type:Object,
+				default:()=>{null}
+			}
+		},
+		methods:{
+		   onTab() {
+				let id = this.item.id;
+				uni.navigateTo({
+					url: `/pages/music-player/detail?id=${this.item.id}&musicName=${this.item.name}&artistName=${this.item.artistVoList[0].name}`
+				}); //对歌曲进行数据请求
+				
+
+				let payload = {
+					id: id
+				};
+				playerStore.dispatch('playMusicWithSongIdAction', payload); //获取当前的歌曲列表/当前歌曲的索引
+				
+				//将音乐放入的播放音乐列表中
+				this.addNewMusicInMusicList()
+				
+			},
+			//子函数
+			//将音乐放入的播放音乐列表中
+			addNewMusicInMusicList(){
+				let index=this.dataIndex
+				console.log(index)
+				playerStore.setState("playSongIndex",index)
+				  uni.$store.commit('setPlaySongIndex',index)
+				// playerStore.setState("playSongList",this.data.JKRecommandMusicList)
+				  
+				//拿到item信息
+				let musicItem=this.item;
+				// //拿到当前的音乐列表
+				// let currentPlayList=this.data.playSongList
+				// //将当前的音乐放入到播放列表的首位
+				// currentPlayList.unshift(musicItem)
+				//   //点击这个item之后就把他放进我们的播放列表中
+				// playerStore.setState("playSongList",currentPlayList)
+				// playerStore.setState("playSongIndex",0)
+				let payload={item:musicItem}
+				playerStore.dispatch('addNewMusicToPlayList',payload)
+			}
+		},
+		mounted(){
+			// let item = this.$props.item
+			
+			// this.artist =item.artistVoList.map(item=>{
+			// 	return item.name
+			// }).join('/')
+			
+			// console.log(item);
+			// // console.log(item.artistVoList);
+			
+			// console.log(this.$props.item);
+		}
+	}
+</script>
+
+<style>
+/* 下面是专辑的样式 */
+.total-album-container{
+	margin-top: 20rpx;
+	display: flex;
+	flex-direction: column;
+	margin-left:10rpx ;
+	margin-right:10rpx ;
+}
+.double-album-container{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content:space-between;
+	align-items: center;
+}
+
+.album-container{
+	width: 350rpx;
+}
+.album-img-container{
+}
+.album-img{
+	height: 350rpx;
+	width: 350rpx;
+}
+.album-name-text{
+	color: black;
+	font-size: 30rpx;
+	font-weight: 400;
+}
+.album-music-length-name{
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+}
+.album-artist-text{
+	color: rgb(193, 192, 192);
+	font-weight: 400;
+	font-size: 30rpx;
+}
+.album-music-length-text{
+	color: rgb(193, 192, 192);
+	font-weight: 400;
+	font-size: 30rpx;
+}
+	
+</style>

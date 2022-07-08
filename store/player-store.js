@@ -87,7 +87,8 @@ const playerStore = new HYEventStore({
 			
 			 if(!isCreateNotification){
 			 	// let payload={ isCreateNotification :isCreateNotification}
-			 	this.dispatch('createNotification') 
+			 	// this.dispatch('createNotification') 
+				uni.$store.dispatch('createNotification')
 				state.isCreateNotification=true
 				uni.$store.commit('setIsCreateNotification',true)
 			 }
@@ -105,7 +106,8 @@ const playerStore = new HYEventStore({
                 state.id = id; 
 				
 				//更新通知栏
-				this.dispatch('updateNotification')
+				// this.dispatch('updateNotification')
+				uni.$store.dispatch('updateNotification')
 				
 				//2.请求歌词
                 //如果存在歌词的链接就请求
@@ -163,8 +165,9 @@ const playerStore = new HYEventStore({
 			   
 			   
 				if (uni.$store.state.isFirstPlay) {
-                    this.dispatch('watchMusic');
-					this.dispatch('watchNotificaiton')
+                   uni.$store.dispatch('watchMusic');
+					// this.dispatch('watchNotificaiton')
+					uni.$store.dispatch('watchNotificaiton')
                     state.isFirstPlay = false;
 					uni.$store.commit('setIsFirstPlay',false)
 					
@@ -180,12 +183,13 @@ const playerStore = new HYEventStore({
                 state.isPlay = isPlay; //设置全局变量isMusicPlay，isMusicPlay用于检验我们退出当前界面后我们是否点击了相同的音乐
 				uni.$store.commit('setIsPlay',isPlay)
 				// console.log(uni.$store.state.CurrentMusicIndex);
-				musicNotification.playOrPause({
-						playing: isPlay
-				});
-				
+				// musicNotification.playOrPause({
+				// 		playing: isPlay
+				// });
+				uni.$store.dispatch('changeNotificaitonPlayState',{isPlay})
 				//更新通知栏
-				this.dispatch('updateNotification')
+				// this.dispatch('updateNotification')
+				uni.$store.dispatch('updateNotification')
 				
 				// #ifndef APP-PLUS
                 appInstance.globalData.isMusicPlay = true;
@@ -197,9 +201,10 @@ const playerStore = new HYEventStore({
                 let isPlay = false;
                 state.isPlay = isPlay; //当我们进行播放的时候我们就已经
 				uni.$store.commit('setIsPlay',isPlay)
-				musicNotification.playOrPause({
-						playing: isPlay
-				});
+				uni.$store.dispatch('changeNotificaitonPlayState',{isPlay})
+				// musicNotification.playOrPause({
+				// 		playing: isPlay
+				// });
 				
 				// #ifndef APP-PLUS
                 appInstance.globalData.isMusicPlay = false;
@@ -210,9 +215,10 @@ const playerStore = new HYEventStore({
                     state.isPlay = isPlay;
                     state.isStop = true;
 					uni.$store.commit('setIsPlay',isPlay)
-					musicNotification.playOrPause({
-							playing: isPlay
-					});
+					uni.$store.dispatch('changeNotificaitonPlayState',{isPlay})
+					// musicNotification.playOrPause({
+					// 		playing: isPlay
+					// });
 					
 					// #ifndef APP-PLUS
                     appInstance.globalData.isMusicPlay = false;
@@ -354,7 +360,8 @@ const playerStore = new HYEventStore({
                 ), //监听播放结束的事件
                 backgroundAudioManager.onEnded(debounce(() => {
                     //切换音乐
-                    this.dispatch('changePlayMusicToNextMusicOrPreMusic', true);
+                    // this.dispatch('changePlayMusicToNextMusicOrPreMusic', true);
+					uni.$store.dispatch('changePlayMusicToNextMusicOrPreMusic',true) 
                 },500));
 				
         },
@@ -709,13 +716,14 @@ const playerStore = new HYEventStore({
 			// 监听播放上一首按钮事件回调
 			plus.globalEvent.addEventListener('musicNotificationPrevious', (event) => {
 				console.log("播放上一首按钮事件回调", event);
-				this.dispatch('changePlayMusicToNextMusicOrPreMusic',false)
-				
+				// this.dispatch('changePlayMusicToNextMusicOrPreMusic',false)
+				uni.$store.dispatch('changePlayMusicToNextMusicOrPreMusic',false)
 			});
 			// 监听播放下一首按钮事件回调
 			plus.globalEvent.addEventListener('musicNotificationNext', (event) => {
 				console.log("播放下一首按钮事件回调", event);
-				this.dispatch('changePlayMusicToNextMusicOrPreMusic',true)
+				// this.dispatch('changePlayMusicToNextMusicOrPreMusic',true)
+				uni.$store.dispatch('changePlayMusicToNextMusicOrPreMusic',true)
 			});
 			
 			// 监听耳机事件回调，注意只能在应用播放音乐的时候才能接收到事件
@@ -747,22 +755,26 @@ const playerStore = new HYEventStore({
 							//下一首
 							case 87:
 								/** 谷歌原文 Key code constant: Play Next media key. */
-								this.dispatch('changePlayMusicToNextMusicOrPreMusic',true)
+								// this.dispatch('changePlayMusicToNextMusicOrPreMusic',true)
+								uni.$store.dispatch('changePlayMusicToNextMusicOrPreMusic',true)
 								break;
 							//上一首
 							case 88:
 								/** 谷歌原文 Key code constant: Play Previous media key. */
-								this.dispatch('changePlayMusicToNextMusicOrPreMusic',false)
+								// this.dispatch('changePlayMusicToNextMusicOrPreMusic',false)
+								uni.$store.dispatch('changePlayMusicToNextMusicOrPreMusic',false)
 								break;
 							//播放
 							case 126:
 								/** 谷歌原文 Key code constant: Play media key. */
-								this.dispatch('changeMusicPlayState',true)
+								// this.dispatch('changeMusicPlayState',true)
+								uni.$store.dispatch('changePlayMusicToNextMusicOrPreMusic',true)
 								break;
 							//暂停
 							case 127:
 								/** 谷歌原文 Key code constant: Pause media key. */
-								this.dispatch('changeMusicPlayState',false)
+								// this.dispatch('changeMusicPlayState',false)
+								uni.$store.dispatch('changePlayMusicToNextMusicOrPreMusic',false)
 								break;
 						}
 						break;

@@ -1531,12 +1531,15 @@ page {
             max-height: 100%;
 
             .music-name-container {
+				// display: flex;
+				// // flex-direction: column;
+				// // justify-content: flex-start;
                 width: 100%;
                 height: fit-content;
                 color: rgb(8, 8, 8);
                 font-size: 48rpx;
                 font-weight: 1400rpx;
-                line-height: 52rpx;
+                // line-height: 52rpx;
                 letter-spacing: 0px;
                 overflow-x: hidden;
                 text-overflow: ellipsis;
@@ -1550,7 +1553,7 @@ page {
                 opacity: 0.6;
                 font-size: 34rpx;
                 font-weight: 800rpx;
-                line-height: 40rpx;
+                // line-height: 40rpx;
                 letter-spacing: 0px;
                 margin-top: 16rpx;
                 overflow-x: hidden;
@@ -1565,7 +1568,7 @@ page {
                 opacity: 0.61;
                 font-size: 34rpx;
                 font-weight: 800rpx;
-                line-height: 40rpx;
+                // line-height: 40rpx;
                 letter-spacing: 0px;
                 margin-top: 16rpx;
                 overflow-x: hidden;
